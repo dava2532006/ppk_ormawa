@@ -71,6 +71,8 @@ class AboutScreen extends StatelessWidget {
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
@@ -207,12 +209,7 @@ class AboutScreen extends StatelessWidget {
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {},
-                          icon: Image.network(
-                            'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg',
-                            width: 20,
-                            height: 20,
-                            color: Colors.white,
-                          ),
+                          icon: const Icon(Icons.chat, color: Colors.white, size: 20),
                           label: const Text('WhatsApp'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF25D366),

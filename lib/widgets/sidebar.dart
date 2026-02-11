@@ -54,7 +54,13 @@ class Sidebar extends StatelessWidget {
                               ),
                               child: user.avatar != null
                                   ? ClipOval(
-                                      child: Image.network(user.avatar!, fit: BoxFit.cover),
+                                      child: Image.network(
+                                        user.avatar!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return const Icon(Icons.person, color: Colors.white, size: 24);
+                                        },
+                                      ),
                                     )
                                   : const Icon(Icons.person, color: Colors.white, size: 24),
                             ),
@@ -70,6 +76,8 @@ class Sidebar extends StatelessWidget {
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
                                     user.role == UserRole.admin
@@ -144,12 +152,7 @@ class Sidebar extends StatelessWidget {
               children: [
                 ElevatedButton.icon(
                   onPressed: () {},
-                  icon: Image.network(
-                    'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg',
-                    width: 20,
-                    height: 20,
-                    color: Colors.white,
-                  ),
+                  icon: const Icon(Icons.chat, color: Colors.white, size: 20),
                   label: const Text('Chat WhatsApp'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF25D366),

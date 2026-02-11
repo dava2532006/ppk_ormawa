@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../models/user.dart';
 import '../utils/theme.dart';
 import 'main_screen.dart';
@@ -247,8 +248,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 50,
                       child: OutlinedButton.icon(
                         onPressed: () => _handleLogin(UserRole.user, 'Google User'),
-                        icon: Image.network(
-                          'https://www.svgrepo.com/show/475656/google-color.svg',
+                        icon: SvgPicture.asset(
+                          'assets/images/google_icon.svg',
                           width: 20,
                           height: 20,
                         ),

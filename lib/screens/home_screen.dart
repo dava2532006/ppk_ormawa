@@ -112,10 +112,12 @@ class HomeScreen extends StatelessWidget {
                               'Bangun Rumah Impian dengan Genteng Terbaik',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 32,
+                                fontSize: 28,
                                 fontWeight: FontWeight.w900,
                                 height: 1.2,
                               ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 12),
                             const Text(
@@ -125,6 +127,8 @@ class HomeScreen extends StatelessWidget {
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
                               ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 20),
                             // Search Bar
@@ -201,8 +205,10 @@ class HomeScreen extends StatelessWidget {
                       TextButton(
                         onPressed: () {},
                         child: const Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text('Lihat Semua', style: TextStyle(fontSize: 13)),
+                            SizedBox(width: 4),
                             Icon(Icons.arrow_forward, size: 16),
                           ],
                         ),

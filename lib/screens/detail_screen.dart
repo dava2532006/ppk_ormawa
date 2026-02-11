@@ -117,36 +117,45 @@ class DetailScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (product.originalPrice != null)
-                                  Text(
-                                    'Rp ${product.originalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: AppTheme.textSec,
-                                      decoration: TextDecoration.lineThrough,
-                                    ),
-                                  ),
-                                Row(
-                                  children: [
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (product.originalPrice != null)
                                     Text(
-                                      'Rp ${product.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
+                                      'Rp ${product.originalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
                                       style: const TextStyle(
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.primary,
+                                        fontSize: 14,
+                                        color: AppTheme.textSec,
+                                        decoration: TextDecoration.lineThrough,
                                       ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    const Text(
-                                      ' / pcs',
-                                      style: TextStyle(fontSize: 14, color: AppTheme.textSec),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          'Rp ${product.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
+                                          style: const TextStyle(
+                                            fontSize: 26,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppTheme.primary,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const Text(
+                                        ' / pcs',
+                                        style: TextStyle(fontSize: 14, color: AppTheme.textSec),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
+                            const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
@@ -154,6 +163,7 @@ class DetailScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Icon(Icons.star, color: Colors.orange, size: 20),
                                   const SizedBox(width: 4),
@@ -165,9 +175,13 @@ class DetailScreen extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(width: 4),
-                                  Text(
-                                    '(${product.sold} terjual)',
-                                    style: const TextStyle(fontSize: 11, color: AppTheme.textSec),
+                                  Flexible(
+                                    child: Text(
+                                      '(${product.sold})',
+                                      style: const TextStyle(fontSize: 11, color: AppTheme.textSec),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -212,20 +226,27 @@ class DetailScreen extends StatelessWidget {
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   Row(
                                     children: [
                                       const Icon(Icons.location_on, size: 14, color: AppTheme.textSec),
                                       const SizedBox(width: 4),
-                                      Text(
-                                        product.location,
-                                        style: const TextStyle(fontSize: 12, color: AppTheme.textSec),
+                                      Expanded(
+                                        child: Text(
+                                          product.location,
+                                          style: const TextStyle(fontSize: 12, color: AppTheme.textSec),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
                             ),
+                            const SizedBox(width: 8),
                             OutlinedButton(
                               onPressed: () {},
                               style: OutlinedButton.styleFrom(
@@ -233,9 +254,10 @@ class DetailScreen extends StatelessWidget {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               ),
                               child: const Text(
-                                'Kunjungi Toko',
+                                'Toko',
                                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -342,12 +364,7 @@ class DetailScreen extends StatelessWidget {
                             await launchUrl(url);
                           }
                         },
-                        icon: Image.network(
-                          'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg',
-                          width: 20,
-                          height: 20,
-                          color: Colors.white,
-                        ),
+                        icon: const Icon(Icons.chat, color: Colors.white, size: 20),
                         label: const Text(
                           'Pesan via WhatsApp',
                           style: TextStyle(fontWeight: FontWeight.bold),
@@ -397,6 +414,8 @@ class DetailScreen extends StatelessWidget {
                 Text(
                   label,
                   style: const TextStyle(fontSize: 11, color: AppTheme.textSec),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   value,
@@ -405,6 +424,8 @@ class DetailScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textMain,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
