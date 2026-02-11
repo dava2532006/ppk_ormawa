@@ -75,20 +75,42 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 768;
+    
     final screens = [
       HomeScreen(
         onProductClick: _onProductClick,
         onMenuClick: () => _scaffoldKey.currentState?.openDrawer(),
+        onNavigate: (index) => setState(() => _currentIndex = index),
+        currentIndex: _currentIndex,
       ),
-      CatalogScreen(onProductClick: _onProductClick),
+      CatalogScreen(
+        onProductClick: _onProductClick,
+        onNavigate: (index) => setState(() => _currentIndex = index),
+        currentIndex: _currentIndex,
+      ),
       CartScreen(
         items: _cartItems,
         onUpdateQuantity: _updateCartQuantity,
         onRemove: _removeCartItem,
+        onNavigate: (index) => setState(() => _currentIndex = index),
+        currentIndex: _currentIndex,
       ),
-      const AboutScreen(),
+      AboutScreen(
+        onNavigate: (index) => setState(() => _currentIndex = index),
+        currentIndex: _currentIndex,
+      ),
     ];
 
+    // Desktop Layout - Full width, hide bottom nav
+    if (isDesktop) {
+      return Scaffold(
+        key: _scaffoldKey,
+        body: screens[_currentIndex],
+      );
+    }
+
+    // Mobile Layout - Show bottom nav
     return Scaffold(
       key: _scaffoldKey,
       drawer: Sidebar(

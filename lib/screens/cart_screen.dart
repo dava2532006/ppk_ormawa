@@ -2,21 +2,27 @@ import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../utils/theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../widgets/desktop_navbar.dart';
 
 class CartScreen extends StatelessWidget {
   final List<CartItem> items;
   final Function(int, int) onUpdateQuantity;
   final Function(int) onRemove;
+  final Function(int)? onNavigate;
+  final int currentIndex;
 
   const CartScreen({
     super.key,
     required this.items,
     required this.onUpdateQuantity,
     required this.onRemove,
+    this.onNavigate,
+    this.currentIndex = 2,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 768;
     final subtotal = items.fold<int>(
       0,
       (sum, item) => item.selected ? sum + (item.product.price * item.quantity) : sum,
@@ -28,7 +34,7 @@ class CartScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppTheme.bgLight,
-      appBar: AppBar(
+      appBar: isDesktop ? null : AppBar(
         title: const Text('Keranjang'),
         centerTitle: true,
         backgroundColor: AppTheme.bgLight,
@@ -39,36 +45,77 @@ class CartScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: items.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey.shade300),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Keranjang belanja Anda kosong',
-                    style: TextStyle(color: AppTheme.textSec),
-                  ),
-                ],
-              ),
-            )
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      return _buildCartItem(item);
-                    },
-                  ),
-                ),
-                if (items.isNotEmpty) _buildSummary(subtotal, totalItems),
-                if (items.isNotEmpty) _buildBottomAction(subtotal),
-              ],
+      body: Column(
+        children: [
+          // Desktop Navbar
+          if (isDesktop && onNavigate != null)
+            DesktopNavbar(
+              currentIndex: currentIndex,
+              onNavigate: onNavigate!,
             ),
+          // Content
+          Expanded(
+            child: Center(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: isDesktop ? 900 : double.infinity,
+                ),
+                child: items.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey.shade300),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Keranjang belanja Anda kosong',
+                              style: TextStyle(color: AppTheme.textSec),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Column(
+                        children: [
+                          // Header Title for Desktop
+                          if (isDesktop)
+                            Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Keranjang Belanja',
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.more_horiz),
+                                    onPressed: () {},
+                                  ),
+                                ],
+                              ),
+                            ),
+                          Expanded(
+                            child: ListView.builder(
+                              padding: EdgeInsets.all(isDesktop ? 24 : 16),
+                              itemCount: items.length,
+                              itemBuilder: (context, index) {
+                                final item = items[index];
+                                return _buildCartItem(item);
+                              },
+                            ),
+                          ),
+                          if (items.isNotEmpty) _buildSummary(subtotal, totalItems, isDesktop),
+                          if (items.isNotEmpty) _buildBottomAction(subtotal, isDesktop),
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -229,9 +276,9 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummary(int subtotal, int totalItems) {
+  Widget _buildSummary(int subtotal, int totalItems, bool isDesktop) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: EdgeInsets.all(isDesktop ? 24 : 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppTheme.surface,
@@ -304,9 +351,9 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomAction(int subtotal) {
+  Widget _buildBottomAction(int subtotal, bool isDesktop) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isDesktop ? 24 : 16),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         border: Border(top: BorderSide(color: Colors.grey.shade100)),

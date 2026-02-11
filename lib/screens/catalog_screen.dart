@@ -3,11 +3,19 @@ import '../models/product.dart';
 import '../data/constants.dart';
 import '../utils/theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../widgets/desktop_navbar.dart';
 
 class CatalogScreen extends StatefulWidget {
   final Function(Product) onProductClick;
+  final Function(int)? onNavigate;
+  final int currentIndex;
 
-  const CatalogScreen({super.key, required this.onProductClick});
+  const CatalogScreen({
+    super.key,
+    required this.onProductClick,
+    this.onNavigate,
+    this.currentIndex = 1,
+  });
 
   @override
   State<CatalogScreen> createState() => _CatalogScreenState();
@@ -23,91 +31,113 @@ class _CatalogScreenState extends State<CatalogScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width > 768;
+    
     return Scaffold(
       backgroundColor: AppTheme.bgLight,
-      appBar: AppBar(
+      appBar: isDesktop ? null : AppBar(
         title: const Text('Katalog Produk'),
         centerTitle: true,
         backgroundColor: AppTheme.bgLight,
       ),
       body: Column(
         children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Cari genteng, atap...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.tune, color: AppTheme.primary),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: Colors.grey.shade100),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: Colors.grey.shade100),
-                ),
-              ),
+          // Desktop Navbar
+          if (isDesktop && widget.onNavigate != null)
+            DesktopNavbar(
+              currentIndex: widget.currentIndex,
+              onNavigate: widget.onNavigate!,
             ),
-          ),
-          // Category Filter
-          SizedBox(
-            height: 50,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                final isSelected = category == _selectedCategory;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: ChoiceChip(
-                    label: Text(category),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() => _selectedCategory = category);
-                    },
-                    backgroundColor: Colors.white,
-                    selectedColor: AppTheme.primary,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : AppTheme.textSec,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    side: BorderSide(
-                      color: isSelected ? Colors.transparent : Colors.grey.shade200,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Product Grid
+          // Content
           Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.65,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
+            child: Center(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: isDesktop ? 1200 : double.infinity,
+                ),
+                child: Column(
+                  children: [
+                    // Search Bar
+                    Padding(
+                      padding: EdgeInsets.all(isDesktop ? 24 : 16),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Cari genteng, atap...',
+                          prefixIcon: const Icon(Icons.search),
+                          suffixIcon: Container(
+                            margin: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.tune, color: AppTheme.primary),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: Colors.grey.shade100),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: Colors.grey.shade100),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Category Filter
+                    SizedBox(
+                      height: 50,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: isDesktop ? 24 : 16),
+                        itemCount: categories.length,
+                        itemBuilder: (context, index) {
+                          final category = categories[index];
+                          final isSelected = category == _selectedCategory;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: ChoiceChip(
+                              label: Text(category),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() => _selectedCategory = category);
+                              },
+                              backgroundColor: Colors.white,
+                              selectedColor: AppTheme.primary,
+                              labelStyle: TextStyle(
+                                color: isSelected ? Colors.white : AppTheme.textSec,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              side: BorderSide(
+                                color: isSelected ? Colors.transparent : Colors.grey.shade200,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Product Grid
+                    Expanded(
+                      child: GridView.builder(
+                        padding: EdgeInsets.all(isDesktop ? 24 : 16),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: isDesktop ? 4 : 2,
+                          childAspectRatio: 0.65,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
+                        itemCount: _filteredProducts.length,
+                        itemBuilder: (context, index) {
+                          final product = _filteredProducts[index];
+                          return _buildProductCard(product);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              itemCount: _filteredProducts.length,
-              itemBuilder: (context, index) {
-                final product = _filteredProducts[index];
-                return _buildProductCard(product);
-              },
             ),
           ),
         ],
