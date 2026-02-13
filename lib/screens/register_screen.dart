@@ -2,43 +2,59 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/theme.dart';
-import 'forgot_password_screen.dart';
-import 'register_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _identifierController = TextEditingController(text: 'customer@jatiwangi.com');
+class _RegisterScreenState extends State<RegisterScreen> {
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _identifierFocus = FocusNode();
+  final _confirmPasswordController = TextEditingController();
+  
+  final _nameFocus = FocusNode();
+  final _emailFocus = FocusNode();
+  final _phoneFocus = FocusNode();
   final _passwordFocus = FocusNode();
-  bool _rememberMe = false;
-  bool _obscurePassword = true;
-  bool _isIdentifierFocused = false;
+  final _confirmPasswordFocus = FocusNode();
+  
+  bool _isNameFocused = false;
+  bool _isEmailFocused = false;
+  bool _isPhoneFocused = false;
   bool _isPasswordFocused = false;
+  bool _isConfirmPasswordFocused = false;
+  
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+  bool _agreeToTerms = false;
 
   @override
   void initState() {
     super.initState();
-    _identifierFocus.addListener(() {
-      setState(() => _isIdentifierFocused = _identifierFocus.hasFocus);
-    });
-    _passwordFocus.addListener(() {
-      setState(() => _isPasswordFocused = _passwordFocus.hasFocus);
-    });
+    _nameFocus.addListener(() => setState(() => _isNameFocused = _nameFocus.hasFocus));
+    _emailFocus.addListener(() => setState(() => _isEmailFocused = _emailFocus.hasFocus));
+    _phoneFocus.addListener(() => setState(() => _isPhoneFocused = _phoneFocus.hasFocus));
+    _passwordFocus.addListener(() => setState(() => _isPasswordFocused = _passwordFocus.hasFocus));
+    _confirmPasswordFocus.addListener(() => setState(() => _isConfirmPasswordFocused = _confirmPasswordFocus.hasFocus));
   }
 
   @override
   void dispose() {
-    _identifierController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
-    _identifierFocus.dispose();
+    _confirmPasswordController.dispose();
+    _nameFocus.dispose();
+    _emailFocus.dispose();
+    _phoneFocus.dispose();
     _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
     super.dispose();
   }
 
@@ -133,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: AppTheme.primary.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.verified, color: Colors.white, size: 24),
+                      child: const Icon(Icons.person_add, color: Colors.white, size: 24),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -142,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'JAMINAN KEASLIAN',
+                            'BERGABUNG SEKARANG',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.95),
                               fontSize: 10,
@@ -152,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 6),
                           const Text(
-                            '100% PRODUK JATIWANGI ASLI',
+                            'AKSES PENUH KE SEMUA FITUR',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -181,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: SingleChildScrollView(
         padding: EdgeInsets.symmetric(
           horizontal: isDesktop ? 48 : 32,
-          vertical: isDesktop ? 32 : 48,
+          vertical: isDesktop ? 24 : 40,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -209,9 +225,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 letterSpacing: -0.5,
               ),
             ),
-            SizedBox(height: isDesktop ? 28 : 40),
+            SizedBox(height: isDesktop ? 20 : 32),
             Text(
-              'Masuk',
+              'Daftar',
               style: TextStyle(
                 fontSize: isDesktop ? 32 : 36,
                 fontWeight: FontWeight.w800,
@@ -220,25 +236,39 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Kelola kebutuhan atap rumah Anda dengan mudah.',
+              'Buat akun untuk mulai berbelanja genteng berkualitas.',
               style: TextStyle(
                 fontSize: 15,
                 color: Colors.grey.shade500,
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: isDesktop ? 28 : 40),
+            SizedBox(height: isDesktop ? 20 : 32),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 448),
               child: Column(
                 children: [
                   _buildFloatingInput(
-                    controller: _identifierController,
-                    focusNode: _identifierFocus,
-                    label: 'Email atau No. Handphone',
-                    isFocused: _isIdentifierFocused,
+                    controller: _nameController,
+                    focusNode: _nameFocus,
+                    label: 'Nama Lengkap',
+                    isFocused: _isNameFocused,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
+                  _buildFloatingInput(
+                    controller: _emailController,
+                    focusNode: _emailFocus,
+                    label: 'Email',
+                    isFocused: _isEmailFocused,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildFloatingInput(
+                    controller: _phoneController,
+                    focusNode: _phoneFocus,
+                    label: 'No. Handphone',
+                    isFocused: _isPhoneFocused,
+                  ),
+                  const SizedBox(height: 16),
                   _buildFloatingInput(
                     controller: _passwordController,
                     focusNode: _passwordFocus,
@@ -253,44 +283,61 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: Checkbox(
-                              value: _rememberMe,
-                              onChanged: (v) => setState(() => _rememberMe = v ?? false),
-                              activeColor: AppTheme.primary,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Ingat Saya',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade600),
-                          ),
-                        ],
+                  const SizedBox(height: 16),
+                  _buildFloatingInput(
+                    controller: _confirmPasswordController,
+                    focusNode: _confirmPasswordFocus,
+                    label: 'Konfirmasi Kata Sandi',
+                    isFocused: _isConfirmPasswordFocused,
+                    obscureText: _obscureConfirmPassword,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        color: Colors.grey.shade400,
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
-                          );
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: Checkbox(
+                          value: _agreeToTerms,
+                          onChanged: (v) => setState(() => _agreeToTerms = v ?? false),
+                          activeColor: AppTheme.primary,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                         ),
-                        child: const Text(
-                          'Lupa Kata Sandi?',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.primary),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Wrap(
+                          children: [
+                            Text(
+                              'Saya setuju dengan ',
+                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            ),
+                            GestureDetector(
+                              onTap: () {},
+                              child: const Text(
+                                'Syarat & Ketentuan',
+                                style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            Text(
+                              ' dan ',
+                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            ),
+                            GestureDetector(
+                              onTap: () {},
+                              child: const Text(
+                                'Kebijakan Privasi',
+                                style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -300,18 +347,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: _agreeToTerms ? () => Navigator.pop(context) : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primary,
+                        disabledBackgroundColor: Colors.grey.shade300,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text(
-                        'Masuk Ke Akun',
+                        'Daftar Sekarang',
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Expanded(child: Divider(color: Colors.grey.shade100)),
@@ -325,80 +373,51 @@ class _LoginScreenState extends State<LoginScreen> {
                       Expanded(child: Divider(color: Colors.grey.shade100)),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: BorderSide(color: Colors.grey.shade200),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SvgPicture.asset(
-                                'assets/images/google_icon.svg',
-                                width: 18,
-                                height: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              const Text('Google', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
-                            ],
-                          ),
+                  const SizedBox(height: 20),
+                  OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: BorderSide(color: Colors.grey.shade200),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      minimumSize: const Size(double.infinity, 48),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/images/google_icon.svg',
+                          width: 18,
+                          height: 18,
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: BorderSide(color: Colors.grey.shade200),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.account_circle_outlined, color: Colors.grey.shade400, size: 18),
-                              const SizedBox(width: 8),
-                              const Text('Tamu', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        const Text('Daftar dengan Google', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: isDesktop ? 28 : 40),
+            SizedBox(height: isDesktop ? 20 : 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Belum punya akun?', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade500)),
+                Text('Sudah punya akun?', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade500)),
                 TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
-                    );
-                  },
+                  onPressed: () => Navigator.pop(context),
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.only(left: 4),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: const Text(
-                    'Daftar Sekarang',
+                    'Masuk',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.primary),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: isDesktop ? 32 : 48),
+            SizedBox(height: isDesktop ? 24 : 40),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

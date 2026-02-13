@@ -1,44 +1,31 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/theme.dart';
-import 'forgot_password_screen.dart';
-import 'register_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _identifierController = TextEditingController(text: 'customer@jatiwangi.com');
-  final _passwordController = TextEditingController();
-  final _identifierFocus = FocusNode();
-  final _passwordFocus = FocusNode();
-  bool _rememberMe = false;
-  bool _obscurePassword = true;
-  bool _isIdentifierFocused = false;
-  bool _isPasswordFocused = false;
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final _emailController = TextEditingController();
+  final _emailFocus = FocusNode();
+  bool _isEmailFocused = false;
 
   @override
   void initState() {
     super.initState();
-    _identifierFocus.addListener(() {
-      setState(() => _isIdentifierFocused = _identifierFocus.hasFocus);
-    });
-    _passwordFocus.addListener(() {
-      setState(() => _isPasswordFocused = _passwordFocus.hasFocus);
+    _emailFocus.addListener(() {
+      setState(() => _isEmailFocused = _emailFocus.hasFocus);
     });
   }
 
   @override
   void dispose() {
-    _identifierController.dispose();
-    _passwordController.dispose();
-    _identifierFocus.dispose();
-    _passwordFocus.dispose();
+    _emailController.dispose();
+    _emailFocus.dispose();
     super.dispose();
   }
 
@@ -133,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: AppTheme.primary.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.verified, color: Colors.white, size: 24),
+                      child: const Icon(Icons.lock_reset, color: Colors.white, size: 24),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -142,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'JAMINAN KEASLIAN',
+                            'RESET PASSWORD',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.95),
                               fontSize: 10,
@@ -152,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 6),
                           const Text(
-                            '100% PRODUK JATIWANGI ASLI',
+                            'KAMI AKAN KIRIM LINK RESET',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -211,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             SizedBox(height: isDesktop ? 28 : 40),
             Text(
-              'Masuk',
+              'Lupa Kata Sandi',
               style: TextStyle(
                 fontSize: isDesktop ? 32 : 36,
                 fontWeight: FontWeight.w800,
@@ -220,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Kelola kebutuhan atap rumah Anda dengan mudah.',
+              'Masukkan email Anda dan kami akan mengirimkan link untuk reset kata sandi.',
               style: TextStyle(
                 fontSize: 15,
                 color: Colors.grey.shade500,
@@ -233,143 +220,35 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 children: [
                   _buildFloatingInput(
-                    controller: _identifierController,
-                    focusNode: _identifierFocus,
-                    label: 'Email atau No. Handphone',
-                    isFocused: _isIdentifierFocused,
-                  ),
-                  const SizedBox(height: 20),
-                  _buildFloatingInput(
-                    controller: _passwordController,
-                    focusNode: _passwordFocus,
-                    label: 'Kata Sandi',
-                    isFocused: _isPasswordFocused,
-                    obscureText: _obscurePassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                        color: Colors.grey.shade400,
-                      ),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: Checkbox(
-                              value: _rememberMe,
-                              onChanged: (v) => setState(() => _rememberMe = v ?? false),
-                              activeColor: AppTheme.primary,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Ingat Saya',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade600),
-                          ),
-                        ],
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
-                          );
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: const Text(
-                          'Lupa Kata Sandi?',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.primary),
-                        ),
-                      ),
-                    ],
+                    controller: _emailController,
+                    focusNode: _emailFocus,
+                    label: 'Email',
+                    isFocused: _isEmailFocused,
                   ),
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        // Show success message
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Link reset password telah dikirim ke email Anda'),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primary,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text(
-                        'Masuk Ke Akun',
+                        'Kirim Link Reset',
                         style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(child: Divider(color: Colors.grey.shade100)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text(
-                          'ATAU',
-                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade400, letterSpacing: 2),
-                        ),
-                      ),
-                      Expanded(child: Divider(color: Colors.grey.shade100)),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: BorderSide(color: Colors.grey.shade200),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SvgPicture.asset(
-                                'assets/images/google_icon.svg',
-                                width: 18,
-                                height: 18,
-                              ),
-                              const SizedBox(width: 8),
-                              const Text('Google', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            side: BorderSide(color: Colors.grey.shade200),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.account_circle_outlined, color: Colors.grey.shade400, size: 18),
-                              const SizedBox(width: 8),
-                              const Text('Tamu', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -378,21 +257,16 @@ class _LoginScreenState extends State<LoginScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Belum punya akun?', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade500)),
+                Text('Sudah ingat kata sandi?', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade500)),
                 TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
-                    );
-                  },
+                  onPressed: () => Navigator.pop(context),
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.only(left: 4),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: const Text(
-                    'Daftar Sekarang',
+                    'Masuk',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.primary),
                   ),
                 ),
@@ -425,8 +299,6 @@ class _LoginScreenState extends State<LoginScreen> {
     required FocusNode focusNode,
     required String label,
     required bool isFocused,
-    bool obscureText = false,
-    Widget? suffixIcon,
   }) {
     final hasValue = controller.text.isNotEmpty;
     final shouldFloat = isFocused || hasValue;
@@ -439,12 +311,12 @@ class _LoginScreenState extends State<LoginScreen> {
           TextField(
             controller: controller,
             focusNode: focusNode,
-            obscureText: obscureText,
+            keyboardType: TextInputType.emailAddress,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               contentPadding: EdgeInsets.only(
                 left: 20,
-                right: suffixIcon != null ? 48 : 20,
+                right: 20,
                 top: shouldFloat ? 20 : 16,
                 bottom: 16,
               ),
@@ -462,7 +334,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               filled: true,
               fillColor: Colors.white,
-              suffixIcon: suffixIcon,
             ),
           ),
           Positioned(
