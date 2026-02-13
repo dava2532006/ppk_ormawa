@@ -7,7 +7,7 @@ import '../utils/theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../widgets/footer.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final Function(Product) onProductClick;
   final VoidCallback onMenuClick;
   final Function(int)? onNavigate;
@@ -26,8 +26,40 @@ class HomeScreen extends StatelessWidget {
   });
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String _sortBy = "Ketersediaan"; // Default sorting
+
+  List<Product> get _sortedProducts {
+    List<Product> products = mockProducts.take(8).toList();
+
+    // Apply sorting
+    if (_sortBy == "Ketersediaan") {
+      products.sort((a, b) {
+        // In stock items first
+        if (a.inStock && !b.inStock) return -1;
+        if (!a.inStock && b.inStock) return 1;
+        // Then sort by name A-Z
+        return a.name.compareTo(b.name);
+      });
+    } else if (_sortBy == "Nama A-Z") {
+      products.sort((a, b) => a.name.compareTo(b.name));
+    } else if (_sortBy == "Nama Z-A") {
+      products.sort((a, b) => b.name.compareTo(a.name));
+    } else if (_sortBy == "Harga Terendah") {
+      products.sort((a, b) => a.price.compareTo(b.price));
+    } else if (_sortBy == "Harga Tertinggi") {
+      products.sort((a, b) => b.price.compareTo(a.price));
+    }
+
+    return products;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final featuredProducts = mockProducts.take(4).toList();
+    final featuredProducts = _sortedProducts.take(4).toList();
     final isDesktop = MediaQuery.of(context).size.width > 768;
 
     return Scaffold(
@@ -139,13 +171,74 @@ class HomeScreen extends StatelessWidget {
                                             ),
                                           ),
                                         ),
-                                        Container(
-                                          padding: const EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            color: AppTheme.primary,
+                                        PopupMenuButton<String>(
+                                          initialValue: _sortBy,
+                                          onSelected: (value) {
+                                            setState(() => _sortBy = value);
+                                          },
+                                          icon: Container(
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                              color: AppTheme.primary,
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: const Icon(Icons.tune, color: Colors.white, size: 20),
+                                          ),
+                                          shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(12),
                                           ),
-                                          child: const Icon(Icons.tune, color: Colors.white, size: 20),
+                                          itemBuilder: (context) => [
+                                            const PopupMenuItem(
+                                              value: "Ketersediaan",
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.inventory_2, size: 18, color: AppTheme.primary),
+                                                  SizedBox(width: 12),
+                                                  Text("Ketersediaan"),
+                                                ],
+                                              ),
+                                            ),
+                                            const PopupMenuItem(
+                                              value: "Nama A-Z",
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.sort_by_alpha, size: 18, color: AppTheme.primary),
+                                                  SizedBox(width: 12),
+                                                  Text("Nama A-Z"),
+                                                ],
+                                              ),
+                                            ),
+                                            const PopupMenuItem(
+                                              value: "Nama Z-A",
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.sort_by_alpha, size: 18, color: AppTheme.primary),
+                                                  SizedBox(width: 12),
+                                                  Text("Nama Z-A"),
+                                                ],
+                                              ),
+                                            ),
+                                            const PopupMenuItem(
+                                              value: "Harga Terendah",
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.arrow_downward, size: 18, color: AppTheme.primary),
+                                                  SizedBox(width: 12),
+                                                  Text("Harga Terendah"),
+                                                ],
+                                              ),
+                                            ),
+                                            const PopupMenuItem(
+                                              value: "Harga Tertinggi",
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.arrow_upward, size: 18, color: AppTheme.primary),
+                                                  SizedBox(width: 12),
+                                                  Text("Harga Tertinggi"),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
@@ -188,8 +281,8 @@ class HomeScreen extends StatelessWidget {
                           ),
                           TextButton(
                             onPressed: () {
-                              if (onNavigate != null) {
-                                onNavigate!(1);
+                              if (widget.onNavigate != null) {
+                                widget.onNavigate!(1);
                               }
                             },
                             child: const Row(
@@ -244,8 +337,8 @@ class HomeScreen extends StatelessWidget {
                       Center(
                         child: OutlinedButton(
                           onPressed: () {
-                            if (onNavigate != null) {
-                              onNavigate!(1);
+                            if (widget.onNavigate != null) {
+                              widget.onNavigate!(1);
                             }
                           },
                           style: OutlinedButton.styleFrom(
@@ -273,7 +366,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           // Navbar on top
-          if (isDesktop && onNavigate != null)
+          if (isDesktop && widget.onNavigate != null)
             Positioned(
               top: 0,
               left: 0,
@@ -311,7 +404,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildProductCard(Product product) {
     return GestureDetector(
-      onTap: () => onProductClick(product),
+      onTap: () => widget.onProductClick(product),
       child: Container(
         decoration: BoxDecoration(
           color: AppTheme.surface,
@@ -339,9 +432,38 @@ class HomeScreen extends StatelessWidget {
                       width: double.infinity,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(color: Colors.grey.shade100),
+                      color: product.inStock ? null : Colors.grey,
+                      colorBlendMode: product.inStock ? null : BlendMode.saturation,
                     ),
                   ),
-                  if (product.isPromo)
+                  if (!product.inStock)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.3),
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                        ),
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'HABIS',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (product.isPromo && product.inStock)
                     Positioned(
                       bottom: 8,
                       left: 8,
@@ -401,9 +523,9 @@ class HomeScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           product.store,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 9,
-                            color: AppTheme.textSec,
+                            color: product.inStock ? AppTheme.textSec : Colors.grey,
                             fontWeight: FontWeight.w500,
                           ),
                           maxLines: 1,
@@ -415,10 +537,10 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     product.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textMain,
+                      color: product.inStock ? AppTheme.textMain : Colors.grey,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -432,10 +554,10 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             Text(
                               'Rp ${product.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: AppTheme.primary,
+                                color: product.inStock ? AppTheme.primary : Colors.grey,
                               ),
                             ),
                             const Text(
@@ -451,7 +573,11 @@ class HomeScreen extends StatelessWidget {
                           border: Border.all(color: Colors.grey.shade200),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Icon(Icons.shopping_cart_outlined, size: 16, color: AppTheme.primary),
+                        child: Icon(
+                          Icons.shopping_cart_outlined,
+                          size: 16,
+                          color: product.inStock ? AppTheme.primary : Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -465,7 +591,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildDesktopNavbar() {
-    final isGuest = user == null || user!.role == UserRole.guest;
+    final isGuest = widget.user == null || widget.user!.role == UserRole.guest;
     
     return ClipRect(
       child: BackdropFilter(
@@ -518,7 +644,7 @@ class HomeScreen extends StatelessWidget {
               // Login Button or User Avatar
               if (isGuest)
                 ElevatedButton(
-                  onPressed: onLogin,
+                  onPressed: widget.onLogin,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -554,11 +680,11 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildNavItem(String label, int index) {
-    final isActive = currentIndex == index;
+    final isActive = widget.currentIndex == index;
     return TextButton(
       onPressed: () {
-        if (onNavigate != null) {
-          onNavigate!(index);
+        if (widget.onNavigate != null) {
+          widget.onNavigate!(index);
         }
       },
       style: TextButton.styleFrom(
@@ -582,7 +708,7 @@ class HomeScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            onPressed: onMenuClick,
+            onPressed: widget.onMenuClick,
             icon: const Icon(Icons.menu, color: Colors.white),
             style: IconButton.styleFrom(
               backgroundColor: Colors.white.withOpacity(0.1),

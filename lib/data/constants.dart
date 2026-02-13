@@ -20,6 +20,7 @@ final List<Product> mockProducts = [
       warranty: "10 Tahun",
     ),
     isPromo: true,
+    inStock: true,
   ),
   Product(
     id: 2,
@@ -38,6 +39,7 @@ final List<Product> mockProducts = [
       spacing: "27 cm",
       warranty: "15 Tahun",
     ),
+    inStock: true,
   ),
   Product(
     id: 3,
@@ -56,6 +58,7 @@ final List<Product> mockProducts = [
       spacing: "30 cm",
       warranty: "20 Tahun",
     ),
+    inStock: false,
   ),
   Product(
     id: 4,
@@ -76,6 +79,7 @@ final List<Product> mockProducts = [
       warranty: "5 Tahun",
     ),
     isPromo: true,
+    inStock: true,
   ),
   Product(
     id: 5,
@@ -94,6 +98,7 @@ final List<Product> mockProducts = [
       spacing: "-",
       warranty: "10 Tahun",
     ),
+    inStock: false,
   ),
   Product(
     id: 6,
@@ -112,6 +117,7 @@ final List<Product> mockProducts = [
       spacing: "23 cm",
       warranty: "8 Tahun",
     ),
+    inStock: true,
   ),
 ];
 

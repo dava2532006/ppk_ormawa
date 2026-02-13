@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/product.dart';
 import '../utils/theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -19,9 +20,11 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen> {
-  int _quantity = 100;
+  int _quantity = 1;
   int _selectedImageIndex = 0;
   final PageController _pageController = PageController();
+  late TextEditingController _quantityController;
+
   bool _isHoveringImage = false;
 
   // Generate product images (main image + 3 variations)
@@ -30,6 +33,7 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   void initState() {
     super.initState();
+    _quantityController = TextEditingController(text: _quantity.toString());
     _productImages = [
       widget.product.image,
       'https://picsum.photos/800/800?random=1',
@@ -40,8 +44,27 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   void dispose() {
+    _quantityController.dispose();
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _updateQuantity(int delta) {
+    setState(() {
+      _quantity = (_quantity + delta).clamp(1, 999999);
+      _quantityController.text = _quantity.toString();
+    });
+  }
+
+  void _setQuantityFromText(String text) {
+    final newQuantity = int.tryParse(text) ?? 1;
+    if (newQuantity < 1) {
+      _quantityController.text = '1';
+      return;
+    }
+    setState(() {
+      _quantity = newQuantity;
+    });
   }
 
   @override
@@ -499,21 +522,42 @@ class _DetailScreenState extends State<DetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    onPressed: () {
-                      if (_quantity > 100) setState(() => _quantity -= 50);
-                    },
+                    onPressed: _quantity > 1 ? () => _updateQuantity(-1) : null,
                     icon: const Icon(Icons.remove),
+                    color: _quantity > 1 ? AppTheme.textMain : Colors.grey.shade300,
                   ),
                   SizedBox(
-                    width: 60,
-                    child: Text(_quantity.toString(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    width: 80,
+                    child: TextField(
+                      controller: _quantityController,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                        isDense: true,
+                      ),
+                      onSubmitted: _setQuantityFromText,
+                      onChanged: (value) {
+                        if (value.isEmpty) return;
+                        _setQuantityFromText(value);
+                      },
+                    ),
                   ),
-                  IconButton(onPressed: () => setState(() => _quantity += 50), icon: const Icon(Icons.add)),
+                  IconButton(
+                    onPressed: () => _updateQuantity(1),
+                    icon: const Icon(Icons.add),
+                    color: AppTheme.primary,
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 8),
-            Text('Min. pembelian 100 pcs', style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
+            Text('Min. pembelian 1 pcs', style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () => widget.onAddToCart(widget.product),

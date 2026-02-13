@@ -12,6 +12,7 @@ class Product {
   final String description;
   final ProductSpecs specs;
   final bool isPromo;
+  final bool inStock;
 
   Product({
     required this.id,
@@ -27,6 +28,7 @@ class Product {
     required this.description,
     required this.specs,
     this.isPromo = false,
+    this.inStock = true,
   });
 }
 
