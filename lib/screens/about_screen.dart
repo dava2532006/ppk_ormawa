@@ -68,7 +68,14 @@ class _AboutScreenState extends State<AboutScreen> {
     final isDesktop = MediaQuery.of(context).size.width > 768;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF7ED),
+      backgroundColor: Colors.white,
+      appBar: !isDesktop ? AppBar(
+        title: const Text('Our Story'),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: AppTheme.textMain,
+        elevation: 0,
+      ) : null,
       body: Stack(
         children: [
           // Main Content with Scroll
@@ -87,7 +94,7 @@ class _AboutScreenState extends State<AboutScreen> {
               ],
             ),
           ),
-          // Navbar on top
+          // Navbar on top for desktop only
           if (isDesktop && widget.onNavigate != null)
             Positioned(
               top: 0,
@@ -98,18 +105,6 @@ class _AboutScreenState extends State<AboutScreen> {
                 onNavigate: widget.onNavigate!,
                 user: widget.user,
                 onLogin: widget.onLogin,
-              ),
-            )
-          else
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: AppBar(
-                title: const Text('Our Story'),
-                centerTitle: true,
-                backgroundColor: AppTheme.primary,
-                elevation: 0,
               ),
             ),
         ],
@@ -499,7 +494,7 @@ class _AboutScreenState extends State<AboutScreen> {
             horizontal: isDesktop ? 80 : 24,
             vertical: isDesktop ? 96 : 48,
           ),
-          color: const Color(0xFFFFF7ED),
+          color: Colors.grey.shade50,
           child: Center(
             child: Container(
               constraints: const BoxConstraints(maxWidth: 1200),
