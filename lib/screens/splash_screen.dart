@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../utils/theme.dart';
-import 'login_screen.dart';
+import '../models/user.dart';
+import 'main_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -103,9 +104,16 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     await Future.delayed(const Duration(milliseconds: 2000));
     
     if (mounted) {
+      // Create guest user
+      final guestUser = User(
+        name: 'Guest',
+        email: 'guest@gentengforyou.com',
+        role: UserRole.guest,
+      );
+      
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
+          pageBuilder: (context, animation, secondaryAnimation) => MainScreen(user: guestUser),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: animation,

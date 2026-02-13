@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/theme.dart';
+import '../models/user.dart';
+import 'main_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -347,7 +349,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: _agreeToTerms ? () => Navigator.pop(context) : null,
+                      onPressed: _agreeToTerms ? () {
+                        // Create new user
+                        final user = User(
+                          name: _nameController.text,
+                          email: _emailController.text,
+                          role: UserRole.user,
+                        );
+                        
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MainScreen(user: user),
+                          ),
+                        );
+                      } : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primary,
                         disabledBackgroundColor: Colors.grey.shade300,

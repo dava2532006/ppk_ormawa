@@ -7,6 +7,7 @@ import 'catalog_screen.dart';
 import 'cart_screen.dart';
 import 'about_screen.dart';
 import 'detail_screen.dart';
+import 'login_screen.dart';
 import '../widgets/sidebar.dart';
 
 class MainScreen extends StatefulWidget {
@@ -83,6 +84,13 @@ class _MainScreenState extends State<MainScreen> {
         onMenuClick: () => _scaffoldKey.currentState?.openDrawer(),
         onNavigate: (index) => setState(() => _currentIndex = index),
         currentIndex: _currentIndex,
+        user: widget.user,
+        onLogin: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        },
       ),
       CatalogScreen(
         onProductClick: _onProductClick,
@@ -99,6 +107,13 @@ class _MainScreenState extends State<MainScreen> {
       AboutScreen(
         onNavigate: (index) => setState(() => _currentIndex = index),
         currentIndex: _currentIndex,
+        user: widget.user,
+        onLogin: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        },
       ),
     ];
 

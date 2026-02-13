@@ -1,5 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../models/product.dart';
+import '../models/user.dart';
 import '../data/constants.dart';
 import '../utils/theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -10,6 +12,8 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback onMenuClick;
   final Function(int)? onNavigate;
   final int currentIndex;
+  final User? user;
+  final VoidCallback? onLogin;
 
   const HomeScreen({
     super.key,
@@ -17,6 +21,8 @@ class HomeScreen extends StatelessWidget {
     required this.onMenuClick,
     this.onNavigate,
     this.currentIndex = 0,
+    this.user,
+    this.onLogin,
   });
 
   @override
@@ -26,119 +32,125 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppTheme.bgLight,
-      body: CustomScrollView(
-        slivers: [
-          // Hero Section
-          SliverToBoxAdapter(
-            child: Container(
-              height: isDesktop ? 500 : 420,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage('https://picsum.photos/800/1000?random=hero'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.7),
-                      Colors.black.withOpacity(0.3),
-                      AppTheme.bgLight,
-                    ],
-                  ),
-                ),
-                child: SafeArea(
-                  child: Column(
+      body: Stack(
+        children: [
+          // Main Content with Scroll
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                // Hero Section
+                SizedBox(
+                  width: double.infinity,
+                  height: isDesktop ? 500 : 420,
+                  child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      // Header - Desktop Navbar or Mobile Burger
-                      if (isDesktop)
-                        _buildDesktopNavbar()
-                      else
-                        _buildMobileHeader(),
-                      const Spacer(),
-                      // Hero Content
-                      Padding(
-                        padding: const EdgeInsets.all(24),
+                      Image.network(
+                        'https://picsum.photos/800/1000?random=hero',
+                        fit: BoxFit.cover,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.7),
+                              Colors.black.withOpacity(0.3),
+                              AppTheme.bgLight,
+                            ],
+                          ),
+                        ),
+                      ),
+                      SafeArea(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primary.withOpacity(0.9),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text(
-                                '#1 Marketplace Genteng',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              'Bangun Rumah Impian dengan Genteng Terbaik',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: isDesktop ? 36 : 28,
-                                fontWeight: FontWeight.w900,
-                                height: 1.2,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'Langsung dari pengrajin lokal Jatiwangi dan sekitarnya. Kualitas terjamin, harga bersaing.',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 20),
-                            // Search Bar
-                            Container(
-                              constraints: BoxConstraints(
-                                maxWidth: isDesktop ? 500 : double.infinity,
-                              ),
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.95),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Colors.white.withOpacity(0.2)),
-                              ),
-                              child: Row(
+                            // Add spacing for navbar on desktop
+                            if (isDesktop) const SizedBox(height: 80),
+                            const Spacer(),
+                            // Hero Content
+                            Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 12),
-                                    child: Icon(Icons.search, color: AppTheme.textSec),
-                                  ),
-                                  const Expanded(
-                                    child: TextField(
-                                      decoration: InputDecoration(
-                                        hintText: 'Cari genteng morando, mantili...',
-                                        border: InputBorder.none,
-                                        hintStyle: TextStyle(fontSize: 14),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primary.withOpacity(0.9),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Text(
+                                      '#1 Marketplace Genteng',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.primary,
-                                      borderRadius: BorderRadius.circular(12),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    'Bangun Rumah Impian dengan Genteng Terbaik',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: isDesktop ? 36 : 28,
+                                      fontWeight: FontWeight.w900,
+                                      height: 1.2,
                                     ),
-                                    child: const Icon(Icons.tune, color: Colors.white, size: 20),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ],
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    'Langsung dari pengrajin lokal Jatiwangi dan sekitarnya. Kualitas terjamin, harga bersaing.',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  // Search Bar
+                                  Container(
+                                    constraints: BoxConstraints(
+                                      maxWidth: isDesktop ? 500 : double.infinity,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.95),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 12),
+                                          child: Icon(Icons.search, color: AppTheme.textSec),
+                                        ),
+                                        const Expanded(
+                                          child: TextField(
+                                            decoration: InputDecoration(
+                                              hintText: 'Cari genteng morando, mantili...',
+                                              border: InputBorder.none,
+                                              hintStyle: TextStyle(fontSize: 14),
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.primary,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: const Icon(Icons.tune, color: Colors.white, size: 20),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  ],
                               ),
                             ),
                           ],
@@ -147,123 +159,134 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-              ),
-            ),
-          ),
-          // Catalog Preview
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(MediaQuery.of(context).size.width > 768 ? 40 : 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Catalog Preview
+                Padding(
+                  padding: EdgeInsets.all(MediaQuery.of(context).size.width > 768 ? 40 : 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Katalog Unggulan',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.textMain,
-                            ),
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Katalog Unggulan',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.textMain,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Pilihan terbaik minggu ini',
+                                style: TextStyle(fontSize: 12, color: AppTheme.textSec),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Pilihan terbaik minggu ini',
-                            style: TextStyle(fontSize: 12, color: AppTheme.textSec),
+                          TextButton(
+                            onPressed: () {
+                              if (onNavigate != null) {
+                                onNavigate!(1);
+                              }
+                            },
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('Lihat Semua', style: TextStyle(fontSize: 13)),
+                                SizedBox(width: 4),
+                                Icon(Icons.arrow_forward, size: 16),
+                              ],
+                            ),
                           ),
                         ],
                       ),
-                      TextButton(
-                        onPressed: () {
-                          if (onNavigate != null) {
-                            onNavigate!(1); // Navigate to Catalog (index 1)
-                          }
-                        },
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
+                      const SizedBox(height: 16),
+                      // Categories
+                      SizedBox(
+                        height: 40,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
                           children: [
-                            Text('Lihat Semua', style: TextStyle(fontSize: 13)),
-                            SizedBox(width: 4),
-                            Icon(Icons.arrow_forward, size: 16),
+                            _buildCategoryChip('Populer', true),
+                            _buildCategoryChip('Morando', false),
+                            _buildCategoryChip('Mantili', false),
+                            _buildCategoryChip('Kerpus', false),
+                            _buildCategoryChip('Beton', false),
                           ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Product Grid
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isDesktop = constraints.maxWidth > 768;
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: isDesktop ? 4 : 2,
+                              childAspectRatio: 0.7,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                            ),
+                            itemCount: featuredProducts.length,
+                            itemBuilder: (context, index) {
+                              return _buildProductCard(featuredProducts[index]);
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 32),
+                      // Show More Button
+                      Center(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            if (onNavigate != null) {
+                              onNavigate!(1);
+                            }
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: AppTheme.primary),
+                            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                          ),
+                          child: const Text(
+                            'Tampilkan Lebih Banyak',
+                            style: TextStyle(
+                              color: AppTheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  // Categories
-                  SizedBox(
-                    height: 40,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        _buildCategoryChip('Populer', true),
-                        _buildCategoryChip('Morando', false),
-                        _buildCategoryChip('Mantili', false),
-                        _buildCategoryChip('Kerpus', false),
-                        _buildCategoryChip('Beton', false),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Product Grid
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isDesktop = constraints.maxWidth > 768;
-                      return GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: isDesktop ? 4 : 2,
-                          childAspectRatio: 0.7,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                        ),
-                        itemCount: featuredProducts.length,
-                        itemBuilder: (context, index) {
-                          return _buildProductCard(featuredProducts[index]);
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 32),
-                  // Show More Button
-                  Center(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        if (onNavigate != null) {
-                          onNavigate!(1); // Navigate to Catalog (index 1)
-                        }
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppTheme.primary),
-                        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                      ),
-                      child: const Text(
-                        'Tampilkan Lebih Banyak',
-                        style: TextStyle(
-                          color: AppTheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+                // Footer
+                const Footer(),
+              ],
             ),
           ),
-          // Footer
-          const SliverToBoxAdapter(
-            child: Footer(),
-          ),
+          // Navbar on top
+          if (isDesktop && onNavigate != null)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _buildDesktopNavbar(),
+            )
+          else
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _buildMobileHeader(),
+            ),
         ],
       ),
     );
@@ -442,54 +465,90 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildDesktopNavbar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-      child: Row(
-        children: [
-          // Logo
-          Row(
+    final isGuest = user == null || user!.role == UserRole.guest;
+    
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.3),
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.white.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
+          ),
+          child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.roofing, color: Colors.white, size: 24),
+              // Logo
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.roofing, color: Colors.white, size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Gentengforyou',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              const Text(
-                'Gentengforyou',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              const Spacer(),
+              // Navigation Menu
+              _buildNavItem('Beranda', 0),
+              const SizedBox(width: 32),
+              _buildNavItem('Katalog Produk', 1),
+              const SizedBox(width: 32),
+              _buildNavItem('Keranjang Belanja', 2),
+              const SizedBox(width: 32),
+              _buildNavItem('Tentang Kami', 3),
+              const SizedBox(width: 40),
+              // Login Button or User Avatar
+              if (isGuest)
+                ElevatedButton(
+                  onPressed: onLogin,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Masuk',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
+              else
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                  ),
+                  child: const Icon(Icons.person, color: Colors.white, size: 20),
                 ),
-              ),
             ],
           ),
-          const Spacer(),
-          // Navigation Menu
-          _buildNavItem('Beranda', 0),
-          const SizedBox(width: 32),
-          _buildNavItem('Katalog Produk', 1),
-          const SizedBox(width: 32),
-          _buildNavItem('Keranjang Belanja', 2),
-          const SizedBox(width: 32),
-          _buildNavItem('Tentang Kami', 3),
-          const SizedBox(width: 40),
-          // User Avatar
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
-            ),
-            child: const Icon(Icons.person, color: Colors.white, size: 20),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -511,9 +570,6 @@ class HomeScreen extends StatelessWidget {
           color: Colors.white,
           fontSize: 14,
           fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-          decoration: isActive ? TextDecoration.underline : null,
-          decorationColor: Colors.white,
-          decorationThickness: 2,
         ),
       ),
     );
