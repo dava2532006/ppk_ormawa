@@ -8,6 +8,7 @@ class DesktopNavbar extends StatelessWidget {
   final Function(int) onNavigate;
   final User? user;
   final VoidCallback? onLogin;
+  final VoidCallback? onProfileClick;
 
   const DesktopNavbar({
     super.key,
@@ -15,6 +16,7 @@ class DesktopNavbar extends StatelessWidget {
     required this.onNavigate,
     this.user,
     this.onLogin,
+    this.onProfileClick,
   });
 
   @override
@@ -38,26 +40,30 @@ class DesktopNavbar extends StatelessWidget {
           child: Row(
             children: [
               // Logo
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary,
-                      borderRadius: BorderRadius.circular(8),
+              InkWell(
+                onTap: () => onNavigate(0),
+                borderRadius: BorderRadius.circular(8),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.roofing, color: Colors.white, size: 24),
                     ),
-                    child: const Icon(Icons.roofing, color: Colors.white, size: 24),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Gentengforyou',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Gentengforyou',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const Spacer(),
               // Navigation Menu
@@ -90,15 +96,19 @@ class DesktopNavbar extends StatelessWidget {
                   ),
                 )
               else
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                InkWell(
+                  onTap: onProfileClick,
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                    ),
+                    child: const Icon(Icons.person, color: Colors.white, size: 20),
                   ),
-                  child: const Icon(Icons.person, color: Colors.white, size: 20),
                 ),
             ],
           ),

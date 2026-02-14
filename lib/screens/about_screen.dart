@@ -9,6 +9,7 @@ class AboutScreen extends StatefulWidget {
   final int currentIndex;
   final User? user;
   final VoidCallback? onLogin;
+  final VoidCallback? onProfileClick;
 
   const AboutScreen({
     super.key,
@@ -16,6 +17,7 @@ class AboutScreen extends StatefulWidget {
     this.currentIndex = 3,
     this.user,
     this.onLogin,
+    this.onProfileClick,
   });
 
   @override
@@ -105,6 +107,7 @@ class _AboutScreenState extends State<AboutScreen> {
                 onNavigate: widget.onNavigate!,
                 user: widget.user,
                 onLogin: widget.onLogin,
+                onProfileClick: widget.onProfileClick,
               ),
             ),
         ],

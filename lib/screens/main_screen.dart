@@ -8,6 +8,7 @@ import 'cart_screen.dart';
 import 'about_screen.dart';
 import 'detail_screen.dart';
 import 'login_screen.dart';
+import 'profile_screen.dart';
 import '../widgets/sidebar.dart';
 
 class MainScreen extends StatefulWidget {
@@ -74,6 +75,25 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  void _navigateToProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ProfileScreen(
+          user: widget.user,
+          onProductClick: _onProductClick,
+          onLogout: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+              (route) => false,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 768;
@@ -91,6 +111,7 @@ class _MainScreenState extends State<MainScreen> {
             MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         },
+        onProfileClick: _navigateToProfile,
       ),
       CatalogScreen(
         onProductClick: _onProductClick,
@@ -114,6 +135,7 @@ class _MainScreenState extends State<MainScreen> {
             MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         },
+        onProfileClick: _navigateToProfile,
       ),
     ];
 

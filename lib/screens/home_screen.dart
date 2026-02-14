@@ -14,6 +14,7 @@ class HomeScreen extends StatefulWidget {
   final int currentIndex;
   final User? user;
   final VoidCallback? onLogin;
+  final VoidCallback? onProfileClick;
 
   const HomeScreen({
     super.key,
@@ -23,6 +24,7 @@ class HomeScreen extends StatefulWidget {
     this.currentIndex = 0,
     this.user,
     this.onLogin,
+    this.onProfileClick,
   });
 
   @override
@@ -261,23 +263,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Katalog Unggulan',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.textMain,
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  'Katalog Unggulan',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textMain,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Pilihan terbaik minggu ini',
-                                style: TextStyle(fontSize: 12, color: AppTheme.textSec),
-                              ),
-                            ],
+                                SizedBox(height: 4),
+                                Text(
+                                  'Pilihan terbaik minggu ini',
+                                  style: TextStyle(fontSize: 12, color: AppTheme.textSec),
+                                ),
+                              ],
+                            ),
                           ),
                           TextButton(
                             onPressed: () {
@@ -559,6 +563,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 fontWeight: FontWeight.bold,
                                 color: product.inStock ? AppTheme.primary : Colors.grey,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             const Text(
                               '/pcs',
@@ -662,15 +668,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 )
               else
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                InkWell(
+                  onTap: widget.onProfileClick,
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                    ),
+                    child: const Icon(Icons.person, color: Colors.white, size: 20),
                   ),
-                  child: const Icon(Icons.person, color: Colors.white, size: 20),
                 ),
             ],
           ),
@@ -714,26 +724,33 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundColor: Colors.white.withOpacity(0.1),
             ),
           ),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary,
-                  borderRadius: BorderRadius.circular(8),
+          InkWell(
+            onTap: () {
+              if (widget.onNavigate != null) {
+                widget.onNavigate!(0);
+              }
+            },
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.roofing, color: Colors.white, size: 18),
                 ),
-                child: const Icon(Icons.roofing, color: Colors.white, size: 18),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'Gentengforyou',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                const SizedBox(width: 8),
+                const Text(
+                  'Gentengforyou',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(width: 40),
         ],

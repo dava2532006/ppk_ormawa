@@ -111,6 +111,8 @@ class _DetailScreenState extends State<DetailScreen> {
                       _buildDescriptionSection(),
                       const SizedBox(height: 32),
                       _buildSpecSection(),
+                      const SizedBox(height: 32),
+                      _buildReviewSection(),
                     ],
                   ),
                 ),
@@ -404,6 +406,235 @@ class _DetailScreenState extends State<DetailScreen> {
               const SizedBox(height: 4),
               Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewSection() {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.star, color: AppTheme.primary, size: 24),
+              const SizedBox(width: 8),
+              const Text('Ulasan Pembeli', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 24),
+          // Rating Summary
+          Row(
+            children: [
+              // Overall Rating
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      widget.product.rating.toString(),
+                      style: const TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: List.generate(5, (index) {
+                        return Icon(
+                          index < widget.product.rating.floor() ? Icons.star : Icons.star_border,
+                          color: Colors.orange,
+                          size: 20,
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${widget.product.sold} ulasan',
+                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 24),
+              // Rating Breakdown
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildRatingBar(5, 0.75),
+                    const SizedBox(height: 8),
+                    _buildRatingBar(4, 0.15),
+                    const SizedBox(height: 8),
+                    _buildRatingBar(3, 0.06),
+                    const SizedBox(height: 8),
+                    _buildRatingBar(2, 0.03),
+                    const SizedBox(height: 8),
+                    _buildRatingBar(1, 0.01),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          const Divider(),
+          const SizedBox(height: 24),
+          // Reviews List
+          _buildReviewItem(
+            'Budi Santoso',
+            5,
+            '2 minggu lalu',
+            'Genteng berkualitas tinggi! Pengiriman cepat dan packing rapi. Sudah dipasang dan hasilnya sangat memuaskan. Warna sesuai dengan foto.',
+          ),
+          const SizedBox(height: 20),
+          _buildReviewItem(
+            'Siti Aminah',
+            5,
+            '1 bulan lalu',
+            'Produk original dan kualitas terjamin. Harga bersaing dan pelayanan ramah. Recommended untuk yang sedang renovasi rumah!',
+          ),
+          const SizedBox(height: 20),
+          _buildReviewItem(
+            'Ahmad Fauzi',
+            4,
+            '1 bulan lalu',
+            'Bagus, sesuai deskripsi. Cuma pengiriman agak lama karena jarak jauh. Overall puas dengan produknya.',
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: OutlinedButton(
+              onPressed: () {},
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppTheme.primary),
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'Lihat Semua Ulasan',
+                style: TextStyle(
+                  color: AppTheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRatingBar(int stars, double percentage) {
+    return Row(
+      children: [
+        Text(
+          '$stars',
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(width: 8),
+        const Icon(Icons.star, color: Colors.orange, size: 16),
+        const SizedBox(width: 12),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: percentage,
+              backgroundColor: Colors.grey.shade200,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.orange),
+              minHeight: 8,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          '${(percentage * 100).toInt()}%',
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReviewItem(String name, int rating, String date, String comment) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade100),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: AppTheme.primary.withOpacity(0.1),
+                child: Text(
+                  name[0],
+                  style: const TextStyle(
+                    color: AppTheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Row(
+                          children: List.generate(5, (index) {
+                            return Icon(
+                              index < rating ? Icons.star : Icons.star_border,
+                              color: Colors.orange,
+                              size: 14,
+                            );
+                          }),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          date,
+                          style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            comment,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade700,
+              height: 1.5,
+            ),
           ),
         ],
       ),
@@ -999,6 +1230,52 @@ class _DetailScreenState extends State<DetailScreen> {
                             _buildSpecItem(Icons.shield, 'Garansi', widget.product.specs.warranty),
                           ],
                         ),
+                        const SizedBox(height: 24),
+                        // Reviews
+                        const Text(
+                          'Ulasan Pembeli',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildMobileReviewSummary(),
+                        const SizedBox(height: 16),
+                        _buildReviewItem(
+                          'Budi Santoso',
+                          5,
+                          '2 minggu lalu',
+                          'Genteng berkualitas tinggi! Pengiriman cepat dan packing rapi. Sudah dipasang dan hasilnya sangat memuaskan.',
+                        ),
+                        const SizedBox(height: 12),
+                        _buildReviewItem(
+                          'Siti Aminah',
+                          5,
+                          '1 bulan lalu',
+                          'Produk original dan kualitas terjamin. Harga bersaing dan pelayanan ramah. Recommended!',
+                        ),
+                        const SizedBox(height: 16),
+                        Center(
+                          child: OutlinedButton(
+                            onPressed: () {},
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppTheme.primary),
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              'Lihat Semua Ulasan',
+                              style: TextStyle(
+                                color: AppTheme.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 100),
                       ],
                     ),
@@ -1075,6 +1352,64 @@ class _DetailScreenState extends State<DetailScreen> {
                   ],
                 ),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileReviewSummary() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.orange.shade100),
+      ),
+      child: Row(
+        children: [
+          Column(
+            children: [
+              Text(
+                widget.product.rating.toString(),
+                style: const TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: List.generate(5, (index) {
+                  return Icon(
+                    index < widget.product.rating.floor() ? Icons.star : Icons.star_border,
+                    color: Colors.orange,
+                    size: 16,
+                  );
+                }),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${widget.product.sold} ulasan',
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+              ),
+            ],
+          ),
+          const SizedBox(width: 24),
+          Expanded(
+            child: Column(
+              children: [
+                _buildRatingBar(5, 0.75),
+                const SizedBox(height: 6),
+                _buildRatingBar(4, 0.15),
+                const SizedBox(height: 6),
+                _buildRatingBar(3, 0.06),
+                const SizedBox(height: 6),
+                _buildRatingBar(2, 0.03),
+                const SizedBox(height: 6),
+                _buildRatingBar(1, 0.01),
+              ],
             ),
           ),
         ],
