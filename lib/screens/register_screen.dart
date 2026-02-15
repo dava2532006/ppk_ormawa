@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/theme.dart';
 import '../models/user.dart';
 import 'main_screen.dart';
+import '../services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -18,19 +19,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   final _nameFocus = FocusNode();
   final _emailFocus = FocusNode();
   final _phoneFocus = FocusNode();
   final _passwordFocus = FocusNode();
   final _confirmPasswordFocus = FocusNode();
-  
+
   bool _isNameFocused = false;
   bool _isEmailFocused = false;
   bool _isPhoneFocused = false;
   bool _isPasswordFocused = false;
   bool _isConfirmPasswordFocused = false;
-  
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
@@ -38,11 +39,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
-    _nameFocus.addListener(() => setState(() => _isNameFocused = _nameFocus.hasFocus));
-    _emailFocus.addListener(() => setState(() => _isEmailFocused = _emailFocus.hasFocus));
-    _phoneFocus.addListener(() => setState(() => _isPhoneFocused = _phoneFocus.hasFocus));
-    _passwordFocus.addListener(() => setState(() => _isPasswordFocused = _passwordFocus.hasFocus));
-    _confirmPasswordFocus.addListener(() => setState(() => _isConfirmPasswordFocused = _confirmPasswordFocus.hasFocus));
+    _nameFocus.addListener(
+        () => setState(() => _isNameFocused = _nameFocus.hasFocus));
+    _emailFocus.addListener(
+        () => setState(() => _isEmailFocused = _emailFocus.hasFocus));
+    _phoneFocus.addListener(
+        () => setState(() => _isPhoneFocused = _phoneFocus.hasFocus));
+    _passwordFocus.addListener(
+        () => setState(() => _isPasswordFocused = _passwordFocus.hasFocus));
+    _confirmPasswordFocus.addListener(() => setState(
+        () => _isConfirmPasswordFocused = _confirmPasswordFocus.hasFocus));
   }
 
   @override
@@ -123,7 +129,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(24),
                 onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                child:
+                    const Icon(Icons.arrow_back, color: Colors.white, size: 24),
               ),
             ),
           ),
@@ -151,7 +158,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         color: AppTheme.primary.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.person_add, color: Colors.white, size: 24),
+                      child: const Icon(Icons.person_add,
+                          color: Colors.white, size: 24),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -193,7 +201,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildFormSection() {
     final isDesktop = MediaQuery.of(context).size.width >= 1024;
-    
+
     return Container(
       height: double.infinity,
       child: SingleChildScrollView(
@@ -279,10 +287,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     obscureText: _obscurePassword,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                         color: Colors.grey.shade400,
                       ),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -294,10 +305,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     obscureText: _obscureConfirmPassword,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        _obscureConfirmPassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                         color: Colors.grey.shade400,
                       ),
-                      onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                      onPressed: () => setState(() =>
+                          _obscureConfirmPassword = !_obscureConfirmPassword),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -308,9 +322,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         height: 18,
                         child: Checkbox(
                           value: _agreeToTerms,
-                          onChanged: (v) => setState(() => _agreeToTerms = v ?? false),
+                          onChanged: (v) =>
+                              setState(() => _agreeToTerms = v ?? false),
                           activeColor: AppTheme.primary,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4)),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -319,24 +335,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           children: [
                             Text(
                               'Saya setuju dengan ',
-                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.grey.shade600),
                             ),
                             GestureDetector(
                               onTap: () {},
                               child: const Text(
                                 'Syarat & Ketentuan',
-                                style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppTheme.primary,
+                                    fontWeight: FontWeight.w600),
                               ),
                             ),
                             Text(
                               ' dan ',
-                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.grey.shade600),
                             ),
                             GestureDetector(
                               onTap: () {},
                               child: const Text(
                                 'Kebijakan Privasi',
-                                style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppTheme.primary,
+                                    fontWeight: FontWeight.w600),
                               ),
                             ),
                           ],
@@ -349,29 +373,96 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: _agreeToTerms ? () {
-                        // Create new user
-                        final user = User(
-                          name: _nameController.text,
-                          email: _emailController.text,
-                          role: UserRole.user,
-                        );
-                        
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MainScreen(user: user),
-                          ),
-                        );
-                      } : null,
+                      onPressed: _agreeToTerms
+                          ? () async {
+                              // 1. Validasi Password
+                              if (_passwordController.text !=
+                                  _confirmPasswordController.text) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Password dan Konfirmasi tidak sama!'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // 2. Validasi Input Kosong
+                              if (_nameController.text.isEmpty ||
+                                  _emailController.text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content:
+                                        Text('Mohon lengkapi Nama dan Email.'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // 3. Tampilkan Loading
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) => const Center(
+                                  child: CircularProgressIndicator(
+                                      color: AppTheme.primary),
+                                ),
+                              );
+
+                              try {
+                                // 4. Panggil Backend Supabase (Lewat AuthService)
+                                await AuthService().signUp(
+                                  _emailController.text.trim(),
+                                  _passwordController.text,
+                                  _nameController.text.trim(),
+                                );
+
+                                // 5. Jika Sukses
+                                if (mounted)
+                                  Navigator.pop(context); // Tutup loading
+
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Registrasi Berhasil! Silakan Login.'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                  // Kembali ke halaman Login agar user bisa masuk
+                                  Navigator.pop(context);
+                                }
+                              } catch (e) {
+                                // 6. Jika Gagal
+                                if (mounted)
+                                  Navigator.pop(context); // Tutup loading
+
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Gagal: ${e.toString().replaceAll("Exception:", "")}'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primary,
                         disabledBackgroundColor: Colors.grey.shade300,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text(
                         'Daftar Sekarang',
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
                     ),
                   ),
@@ -383,7 +474,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           'ATAU',
-                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade400, letterSpacing: 2),
+                          style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade400,
+                              letterSpacing: 2),
                         ),
                       ),
                       Expanded(child: Divider(color: Colors.grey.shade100)),
@@ -395,7 +490,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       side: BorderSide(color: Colors.grey.shade200),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                       minimumSize: const Size(double.infinity, 48),
                     ),
                     child: Row(
@@ -407,7 +503,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           height: 18,
                         ),
                         const SizedBox(width: 8),
-                        const Text('Daftar dengan Google', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
+                        const Text('Daftar dengan Google',
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.textMain)),
                       ],
                     ),
                   ),
@@ -418,7 +518,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Sudah punya akun?', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade500)),
+                Text('Sudah punya akun?',
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade500)),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   style: TextButton.styleFrom(
@@ -428,7 +532,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   child: const Text(
                     'Masuk',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary),
                   ),
                 ),
               ],
@@ -447,7 +554,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 12),
             Text(
               '© 2024 GENTENGFORYOU INDONESIA',
-              style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: Colors.grey.shade300, letterSpacing: 2),
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade300,
+                  letterSpacing: 2),
             ),
           ],
         ),
@@ -512,8 +623,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   label,
                   style: TextStyle(
                     fontSize: shouldFloat ? 12 : 15,
-                    color: shouldFloat && isFocused ? AppTheme.primary : Colors.grey.shade400,
-                    fontWeight: shouldFloat ? FontWeight.w500 : FontWeight.normal,
+                    color: shouldFloat && isFocused
+                        ? AppTheme.primary
+                        : Colors.grey.shade400,
+                    fontWeight:
+                        shouldFloat ? FontWeight.w500 : FontWeight.normal,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.visible,
@@ -529,10 +643,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildFooterLink(String text) {
     return TextButton(
       onPressed: () {},
-      style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+      style: TextButton.styleFrom(
+          padding: EdgeInsets.zero, minimumSize: Size.zero),
       child: Text(
         text,
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.grey.shade400, letterSpacing: 2),
+        style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade400,
+            letterSpacing: 2),
       ),
     );
   }

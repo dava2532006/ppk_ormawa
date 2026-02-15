@@ -6,6 +6,7 @@ import '../models/user.dart';
 import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 import 'main_screen.dart';
+import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,7 +16,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _identifierController = TextEditingController(text: 'customer@jatiwangi.com');
+  final _identifierController =
+      TextEditingController(text: 'customer@jatiwangi.com');
   final _passwordController = TextEditingController();
   final _identifierFocus = FocusNode();
   final _passwordFocus = FocusNode();
@@ -107,7 +109,8 @@ class _LoginScreenState extends State<LoginScreen> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(24),
                 onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                child:
+                    const Icon(Icons.arrow_back, color: Colors.white, size: 24),
               ),
             ),
           ),
@@ -135,7 +138,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: AppTheme.primary.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.verified, color: Colors.white, size: 24),
+                      child: const Icon(Icons.verified,
+                          color: Colors.white, size: 24),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -177,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildFormSection() {
     final isDesktop = MediaQuery.of(context).size.width >= 1024;
-    
+
     return Container(
       height: double.infinity,
       child: SingleChildScrollView(
@@ -249,10 +253,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     obscureText: _obscurePassword,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                         color: Colors.grey.shade400,
                       ),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -266,15 +273,20 @@ class _LoginScreenState extends State<LoginScreen> {
                             height: 18,
                             child: Checkbox(
                               value: _rememberMe,
-                              onChanged: (v) => setState(() => _rememberMe = v ?? false),
+                              onChanged: (v) =>
+                                  setState(() => _rememberMe = v ?? false),
                               activeColor: AppTheme.primary,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4)),
                             ),
                           ),
                           const SizedBox(width: 8),
                           Text(
                             'Ingat Saya',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade600),
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade600),
                           ),
                         ],
                       ),
@@ -282,7 +294,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const ForgotPasswordScreen()),
                           );
                         },
                         style: TextButton.styleFrom(
@@ -292,7 +306,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         child: const Text(
                           'Lupa Kata Sandi?',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.primary),
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.primary),
                         ),
                       ),
                     ],
@@ -302,28 +319,81 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Create logged in user
-                        final user = User(
-                          name: _identifierController.text.split('@')[0],
-                          email: _identifierController.text,
-                          role: UserRole.user,
-                        );
-                        
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MainScreen(user: user),
+                      onPressed: () async {
+                        // 1. Validasi Input Kosong
+                        if (_identifierController.text.isEmpty ||
+                            _passwordController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Email dan Password harus diisi!'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+
+                        // 2. Tampilkan Loading (Spinner)
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => const Center(
+                            child: CircularProgressIndicator(
+                                color: AppTheme.primary),
                           ),
                         );
+
+                        try {
+                          // 3. Panggil Backend Supabase
+                          await AuthService().signIn(
+                            _identifierController.text.trim(),
+                            _passwordController.text,
+                          );
+
+                          // 4. Tutup Loading jika sukses
+                          if (mounted) Navigator.pop(context);
+
+                          // 5. Ambil Data User Asli & Pindah Halaman
+                          if (mounted) {
+                            final user = AuthService().getCurrentUser();
+
+                            // Jika user null (aneh tapi mungkin terjadi), lempar error
+                            if (user == null)
+                              throw 'Gagal mengambil data user.';
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MainScreen(user: user),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          // 6. Jika Error (Password salah / User tidak ada)
+                          if (mounted)
+                            Navigator.pop(context); // Tutup loading dulu
+
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    'Login Gagal: ${e.toString().replaceAll("Exception:", "")}'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Text(
                         'Masuk Ke Akun',
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
                     ),
                   ),
@@ -335,7 +405,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           'ATAU',
-                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade400, letterSpacing: 2),
+                          style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade400,
+                              letterSpacing: 2),
                         ),
                       ),
                       Expanded(child: Divider(color: Colors.grey.shade100)),
@@ -350,7 +424,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             side: BorderSide(color: Colors.grey.shade200),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -361,7 +436,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 height: 18,
                               ),
                               const SizedBox(width: 8),
-                              const Text('Google', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
+                              const Text('Google',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.textMain)),
                             ],
                           ),
                         ),
@@ -376,25 +455,32 @@ class _LoginScreenState extends State<LoginScreen> {
                               email: 'guest@gentengforyou.com',
                               role: UserRole.guest,
                             );
-                            
+
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => MainScreen(user: guestUser),
+                                builder: (context) =>
+                                    MainScreen(user: guestUser),
                               ),
                             );
                           },
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             side: BorderSide(color: Colors.grey.shade200),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.account_circle_outlined, color: Colors.grey.shade400, size: 18),
+                              Icon(Icons.account_circle_outlined,
+                                  color: Colors.grey.shade400, size: 18),
                               const SizedBox(width: 8),
-                              const Text('Tamu', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
+                              const Text('Tamu',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.textMain)),
                             ],
                           ),
                         ),
@@ -408,12 +494,17 @@ class _LoginScreenState extends State<LoginScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Belum punya akun?', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade500)),
+                Text('Belum punya akun?',
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade500)),
                 TextButton(
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const RegisterScreen()),
                     );
                   },
                   style: TextButton.styleFrom(
@@ -423,7 +514,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: const Text(
                     'Daftar Sekarang',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary),
                   ),
                 ),
               ],
@@ -442,7 +536,11 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 12),
             Text(
               '© 2024 GENTENGFORYOU INDONESIA',
-              style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: Colors.grey.shade300, letterSpacing: 2),
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade300,
+                  letterSpacing: 2),
             ),
           ],
         ),
@@ -507,8 +605,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   label,
                   style: TextStyle(
                     fontSize: shouldFloat ? 12 : 15,
-                    color: shouldFloat && isFocused ? AppTheme.primary : Colors.grey.shade400,
-                    fontWeight: shouldFloat ? FontWeight.w500 : FontWeight.normal,
+                    color: shouldFloat && isFocused
+                        ? AppTheme.primary
+                        : Colors.grey.shade400,
+                    fontWeight:
+                        shouldFloat ? FontWeight.w500 : FontWeight.normal,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.visible,
@@ -524,10 +625,15 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildFooterLink(String text) {
     return TextButton(
       onPressed: () {},
-      style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
+      style: TextButton.styleFrom(
+          padding: EdgeInsets.zero, minimumSize: Size.zero),
       child: Text(
         text,
-        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.grey.shade400, letterSpacing: 2),
+        style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade400,
+            letterSpacing: 2),
       ),
     );
   }

@@ -57,3 +57,4 @@ class CartItem {
     this.selected = true,
   });
 }
+// Tambahkan ini di dalam class Product
