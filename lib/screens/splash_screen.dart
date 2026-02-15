@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../utils/theme.dart';
-import '../models/user.dart';
+// 👇 KITA UBAH INI: Pakai alias 'app_models' biar tidak bentrok dengan Supabase
+import '../models/user.dart' as app_models;
 import 'main_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,13 +13,15 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
+  // --- Animation Controllers ---
   late AnimationController _scaleController;
   late AnimationController _fadeController;
   late AnimationController _slideController;
   late AnimationController _rotateController;
   late AnimationController _pulseController;
-  
+
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -27,8 +31,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    
-    // Scale animation for logo
+    _initAnimations();
+    _startSequence();
+  }
+
+  void _initAnimations() {
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -38,7 +45,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       curve: Curves.elasticOut,
     );
 
-    // Fade animation for logo
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -48,7 +54,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       curve: Curves.easeIn,
     );
 
-    // Slide animation for text
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -61,7 +66,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       curve: Curves.easeOutCubic,
     ));
 
-    // Rotate animation for roof icon
     _rotateController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
@@ -74,7 +78,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       curve: Curves.easeOutBack,
     ));
 
-    // Pulse animation for background circles
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
@@ -86,41 +89,60 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       parent: _pulseController,
       curve: Curves.easeInOut,
     ));
-
-    _startAnimations();
   }
 
-  void _startAnimations() async {
+  void _startSequence() async {
     await Future.delayed(const Duration(milliseconds: 300));
     _fadeController.forward();
     _rotateController.forward();
-    
+
     await Future.delayed(const Duration(milliseconds: 200));
     _scaleController.forward();
-    
+
     await Future.delayed(const Duration(milliseconds: 400));
     _slideController.forward();
-    
-    await Future.delayed(const Duration(milliseconds: 2000));
-    
+
+    await Future.delayed(const Duration(milliseconds: 1500));
+
     if (mounted) {
-      // Create guest user
-      final guestUser = User(
+      _checkAuthAndNavigate();
+    }
+  }
+
+  Future<void> _checkAuthAndNavigate() async {
+    final session = Supabase.instance.client.auth.currentSession;
+
+    app_models.User currentUser;
+
+    if (session != null) {
+      // JIKA SUDAH LOGIN
+      currentUser = app_models.User(
+        name: session.user.userMetadata?['full_name'] ?? 'User',
+        email: session.user.email ?? '',
+        // Kita sesuaikan Role dengan yang ada di kodemu (UserRole.user)
+        role: app_models.UserRole.user,
+      );
+    } else {
+      // JIKA GUEST
+      currentUser = app_models.User(
         name: 'Guest',
         email: 'guest@gentengforyou.com',
-        role: UserRole.guest,
+        role: app_models.UserRole.guest,
       );
-      
+    }
+
+    if (mounted) {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => MainScreen(user: guestUser),
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              MainScreen(user: currentUser),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: animation,
               child: child,
             );
           },
-          transitionDuration: const Duration(milliseconds: 500),
+          transitionDuration: const Duration(milliseconds: 800),
         ),
       );
     }
@@ -155,15 +177,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         ),
         child: Stack(
           children: [
-            // Animated background circles
             _buildAnimatedCircles(),
-            
-            // Main content
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Animated logo
                   FadeTransition(
                     opacity: _fadeAnimation,
                     child: ScaleTransition(
@@ -199,8 +217,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     ),
                   ),
                   const SizedBox(height: 32),
-                  
-                  // Animated text
                   SlideTransition(
                     position: _slideAnimation,
                     child: FadeTransition(
@@ -218,11 +234,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                           ),
                           const SizedBox(height: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 6),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.white.withOpacity(0.3)),
+                              border: Border.all(
+                                  color: Colors.white.withOpacity(0.3)),
                             ),
                             child: const Text(
                               'Marketplace Genteng #1',
@@ -239,8 +257,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     ),
                   ),
                   const SizedBox(height: 60),
-                  
-                  // Loading indicator
                   FadeTransition(
                     opacity: _fadeAnimation,
                     child: SizedBox(
@@ -257,8 +273,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 ],
               ),
             ),
-            
-            // Bottom tagline
             Positioned(
               bottom: 60,
               left: 0,
@@ -304,7 +318,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       builder: (context, child) {
         return Stack(
           children: [
-            // Circle 1
             Positioned(
               top: -100,
               right: -100,
@@ -320,7 +333,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 ),
               ),
             ),
-            // Circle 2
             Positioned(
               bottom: -150,
               left: -150,
@@ -336,7 +348,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 ),
               ),
             ),
-            // Circle 3
             Positioned(
               top: 100,
               left: -50,
@@ -352,7 +363,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 ),
               ),
             ),
-            // Floating particles
             ...List.generate(8, (index) {
               return Positioned(
                 top: 100.0 + (index * 80),

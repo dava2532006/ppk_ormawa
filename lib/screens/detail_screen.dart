@@ -4,6 +4,9 @@ import '../models/product.dart';
 import '../utils/theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
+// 👇 1. Import Tambahan untuk Logic
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'login_screen.dart';
 
 class DetailScreen extends StatefulWidget {
   final Product product;
@@ -27,7 +30,6 @@ class _DetailScreenState extends State<DetailScreen> {
 
   bool _isHoveringImage = false;
 
-  // Generate product images (main image + 3 variations)
   late final List<String> _productImages;
 
   @override
@@ -47,6 +49,35 @@ class _DetailScreenState extends State<DetailScreen> {
     _quantityController.dispose();
     _pageController.dispose();
     super.dispose();
+  }
+
+  // 👇 2. FUNGSI LOGIC SATPAM (CEK LOGIN)
+  void _handleAddToCart() {
+    final user = Supabase.instance.client.auth.currentUser;
+
+    if (user == null) {
+      // JIKA GUEST: Tampilkan snackbar error & arahkan login
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Silakan Login atau Daftar untuk berbelanja'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    } else {
+      // JIKA USER: Lakukan fungsi beli
+      widget.onAddToCart(widget.product);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Produk berhasil ditambahkan ke keranjang'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   void _updateQuantity(int delta) {
@@ -184,7 +215,8 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                 ),
               // Right Arrow
-              if (_isHoveringImage && _selectedImageIndex < _productImages.length - 1)
+              if (_isHoveringImage &&
+                  _selectedImageIndex < _productImages.length - 1)
                 Positioned(
                   right: 16,
                   top: 0,
@@ -217,7 +249,8 @@ class _DetailScreenState extends State<DetailScreen> {
                 bottom: 16,
                 right: 16,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.6),
                     borderRadius: BorderRadius.circular(20),
@@ -241,7 +274,8 @@ class _DetailScreenState extends State<DetailScreen> {
             if (index < 3) {
               return Padding(
                 padding: EdgeInsets.only(right: index < 2 ? 16 : 0),
-                child: _buildThumbnail(_productImages[index], _selectedImageIndex == index, index),
+                child: _buildThumbnail(
+                    _productImages[index], _selectedImageIndex == index, index),
               );
             } else {
               return GestureDetector(
@@ -253,14 +287,17 @@ class _DetailScreenState extends State<DetailScreen> {
                     color: Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: _selectedImageIndex == index ? AppTheme.primary : Colors.grey.shade300,
+                      color: _selectedImageIndex == index
+                          ? AppTheme.primary
+                          : Colors.grey.shade300,
                       width: _selectedImageIndex == index ? 2 : 1,
                     ),
                   ),
                   child: Center(
                     child: Text(
                       '+${_productImages.length - 3} Foto',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -308,13 +345,15 @@ class _DetailScreenState extends State<DetailScreen> {
             children: [
               Icon(Icons.description, color: AppTheme.primary, size: 24),
               const SizedBox(width: 8),
-              const Text('Deskripsi Produk', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text('Deskripsi Produk',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             ],
           ),
           const SizedBox(height: 24),
           Text(
             widget.product.description,
-            style: TextStyle(fontSize: 15, color: Colors.grey.shade600, height: 1.6),
+            style: TextStyle(
+                fontSize: 15, color: Colors.grey.shade600, height: 1.6),
           ),
           const SizedBox(height: 24),
           _buildFeatureItem('Lapisan Glazur berkualitas tinggi'),
@@ -332,7 +371,9 @@ class _DetailScreenState extends State<DetailScreen> {
       children: [
         const Icon(Icons.check_circle, color: AppTheme.primary, size: 20),
         const SizedBox(width: 12),
-        Expanded(child: Text(text, style: TextStyle(fontSize: 14, color: Colors.grey.shade700))),
+        Expanded(
+            child: Text(text,
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade700))),
       ],
     );
   }
@@ -352,23 +393,32 @@ class _DetailScreenState extends State<DetailScreen> {
             children: [
               Icon(Icons.info, color: AppTheme.primary, size: 24),
               const SizedBox(width: 8),
-              const Text('Spesifikasi', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text('Spesifikasi',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             ],
           ),
           const SizedBox(height: 24),
           Row(
             children: [
-              Expanded(child: _buildSpecCard(Icons.scale, 'Berat', widget.product.specs.weight, Colors.orange)),
+              Expanded(
+                  child: _buildSpecCard(Icons.scale, 'Berat',
+                      widget.product.specs.weight, Colors.orange)),
               const SizedBox(width: 16),
-              Expanded(child: _buildSpecCard(Icons.grid_view, 'Kebutuhan', widget.product.specs.coverage, Colors.blue)),
+              Expanded(
+                  child: _buildSpecCard(Icons.grid_view, 'Kebutuhan',
+                      widget.product.specs.coverage, Colors.blue)),
             ],
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(child: _buildSpecCard(Icons.straighten, 'Jarak Reng', widget.product.specs.spacing, Colors.purple)),
+              Expanded(
+                  child: _buildSpecCard(Icons.straighten, 'Jarak Reng',
+                      widget.product.specs.spacing, Colors.purple)),
               const SizedBox(width: 16),
-              Expanded(child: _buildSpecCard(Icons.shield, 'Garansi', widget.product.specs.warranty, Colors.green)),
+              Expanded(
+                  child: _buildSpecCard(Icons.shield, 'Garansi',
+                      widget.product.specs.warranty, Colors.green)),
             ],
           ),
         ],
@@ -376,7 +426,8 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  Widget _buildSpecCard(IconData icon, String label, String value, Color color) {
+  Widget _buildSpecCard(
+      IconData icon, String label, String value, Color color) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -401,10 +452,16 @@ class _DetailScreenState extends State<DetailScreen> {
             children: [
               Text(
                 label.toUpperCase(),
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.2),
+                style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade500,
+                    letterSpacing: 1.2),
               ),
               const SizedBox(height: 4),
-              Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(value,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
             ],
           ),
         ],
@@ -427,7 +484,8 @@ class _DetailScreenState extends State<DetailScreen> {
             children: [
               Icon(Icons.star, color: AppTheme.primary, size: 24),
               const SizedBox(width: 8),
-              const Text('Ulasan Pembeli', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text('Ulasan Pembeli',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             ],
           ),
           const SizedBox(height: 24),
@@ -455,7 +513,9 @@ class _DetailScreenState extends State<DetailScreen> {
                     Row(
                       children: List.generate(5, (index) {
                         return Icon(
-                          index < widget.product.rating.floor() ? Icons.star : Icons.star_border,
+                          index < widget.product.rating.floor()
+                              ? Icons.star
+                              : Icons.star_border,
                           color: Colors.orange,
                           size: 20,
                         );
@@ -464,7 +524,8 @@ class _DetailScreenState extends State<DetailScreen> {
                     const SizedBox(height: 8),
                     Text(
                       '${widget.product.sold} ulasan',
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                      style:
+                          TextStyle(fontSize: 12, color: Colors.grey.shade600),
                     ),
                   ],
                 ),
@@ -518,7 +579,8 @@ class _DetailScreenState extends State<DetailScreen> {
               onPressed: () {},
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppTheme.primary),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -567,7 +629,8 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  Widget _buildReviewItem(String name, int rating, String date, String comment) {
+  Widget _buildReviewItem(
+      String name, int rating, String date, String comment) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -618,7 +681,8 @@ class _DetailScreenState extends State<DetailScreen> {
                         const SizedBox(width: 8),
                         Text(
                           date,
-                          style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                          style: TextStyle(
+                              fontSize: 11, color: Colors.grey.shade500),
                         ),
                       ],
                     ),
@@ -648,7 +712,10 @@ class _DetailScreenState extends State<DetailScreen> {
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 4)),
+          BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 4)),
         ],
       ),
       child: Padding(
@@ -659,18 +726,28 @@ class _DetailScreenState extends State<DetailScreen> {
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(20)),
+              decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(20)),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.check_circle, color: Colors.green.shade600, size: 14),
+                  Icon(Icons.check_circle,
+                      color: Colors.green.shade600, size: 14),
                   const SizedBox(width: 6),
-                  Text('READY STOCK', style: TextStyle(color: Colors.green.shade600, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                  Text('READY STOCK',
+                      style: TextStyle(
+                          color: Colors.green.shade600,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2)),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            Text(widget.product.name, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, height: 1.3)),
+            Text(widget.product.name,
+                style: const TextStyle(
+                    fontSize: 24, fontWeight: FontWeight.bold, height: 1.3)),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -681,19 +758,29 @@ class _DetailScreenState extends State<DetailScreen> {
                   children: [
                     Text(
                       'Rp ${widget.product.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                      style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: AppTheme.primary),
+                      style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.primary),
                     ),
-                    Text(' / pcs', style: TextStyle(fontSize: 14, color: Colors.grey.shade400)),
+                    Text(' / pcs',
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.grey.shade400)),
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(color: Colors.yellow.shade50, borderRadius: BorderRadius.circular(20)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                      color: Colors.yellow.shade50,
+                      borderRadius: BorderRadius.circular(20)),
                   child: Row(
                     children: [
                       const Icon(Icons.star, color: Colors.orange, size: 18),
                       const SizedBox(width: 4),
-                      Text(widget.product.rating.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      Text(widget.product.rating.toString(),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 14)),
                     ],
                   ),
                 ),
@@ -711,19 +798,25 @@ class _DetailScreenState extends State<DetailScreen> {
                 children: [
                   CircleAvatar(
                     radius: 24,
-                    backgroundImage: NetworkImage('https://picsum.photos/100/100?random=${widget.product.store}'),
+                    backgroundImage: NetworkImage(
+                        'https://picsum.photos/100/100?random=${widget.product.store}'),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(widget.product.store, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        Text(widget.product.store,
+                            style: const TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold)),
                         Row(
                           children: [
-                            Icon(Icons.location_on, size: 14, color: Colors.grey.shade500),
+                            Icon(Icons.location_on,
+                                size: 14, color: Colors.grey.shade500),
                             const SizedBox(width: 4),
-                            Text(widget.product.location, style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                            Text(widget.product.location,
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.grey.shade500)),
                           ],
                         ),
                       ],
@@ -733,16 +826,25 @@ class _DetailScreenState extends State<DetailScreen> {
                     onPressed: () {},
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppTheme.primary),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                     ),
-                    child: const Text('Toko', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    child: const Text('Toko',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 32),
-            Text('JUMLAH PESANAN', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade500, letterSpacing: 1.2)),
+            Text('JUMLAH PESANAN',
+                style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade500,
+                    letterSpacing: 1.2)),
             const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
@@ -755,7 +857,9 @@ class _DetailScreenState extends State<DetailScreen> {
                   IconButton(
                     onPressed: _quantity > 1 ? () => _updateQuantity(-1) : null,
                     icon: const Icon(Icons.remove),
-                    color: _quantity > 1 ? AppTheme.textMain : Colors.grey.shade300,
+                    color: _quantity > 1
+                        ? AppTheme.textMain
+                        : Colors.grey.shade300,
                   ),
                   SizedBox(
                     width: 80,
@@ -763,7 +867,8 @@ class _DetailScreenState extends State<DetailScreen> {
                       controller: _quantityController,
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                       ],
@@ -788,30 +893,37 @@ class _DetailScreenState extends State<DetailScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text('Min. pembelian 1 pcs', style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
+            Text('Min. pembelian 1 pcs',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              onPressed: () => widget.onAddToCart(widget.product),
+              // 👇 Panggil Logic Satpam di Desktop
+              onPressed: _handleAddToCart,
               icon: const Icon(Icons.shopping_cart, color: Colors.white),
-              label: const Text('Tambah ke Keranjang', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              label: const Text('Tambah ke Keranjang',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primary,
                 minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
               ),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () async {
-                final url = Uri.parse('https://wa.me/?text=Halo, saya tertarik dengan ${widget.product.name}');
+                final url = Uri.parse(
+                    'https://wa.me/?text=Halo, saya tertarik dengan ${widget.product.name}');
                 if (await canLaunchUrl(url)) await launchUrl(url);
               },
               icon: const Icon(Icons.chat, color: Colors.white, size: 20),
-              label: const Text('Pesan via WhatsApp', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              label: const Text('Pesan via WhatsApp',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF25D366),
                 minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
               ),
             ),
             const SizedBox(height: 24),
@@ -821,13 +933,17 @@ class _DetailScreenState extends State<DetailScreen> {
                 TextButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.share, size: 18),
-                  label: const Text('BAGIKAN', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  label: const Text('BAGIKAN',
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 24),
                 TextButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.favorite_border, size: 18),
-                  label: const Text('SIMPAN', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  label: const Text('SIMPAN',
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
@@ -837,6 +953,7 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
+  // 👇 Saya lengkapi Layout Mobile yang tadi terpotong
   Widget _buildMobileLayout() {
     return Scaffold(
       backgroundColor: AppTheme.surface,
@@ -854,7 +971,8 @@ class _DetailScreenState extends State<DetailScreen> {
                   child: CircleAvatar(
                     backgroundColor: Colors.white.withOpacity(0.8),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppTheme.textMain),
+                      icon: const Icon(Icons.arrow_back,
+                          color: AppTheme.textMain),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -875,416 +993,121 @@ class _DetailScreenState extends State<DetailScreen> {
                     child: CircleAvatar(
                       backgroundColor: Colors.white.withOpacity(0.8),
                       child: IconButton(
-                        icon: const Icon(Icons.favorite_border, color: AppTheme.textMain),
+                        icon: const Icon(Icons.favorite_border,
+                            color: AppTheme.textMain),
                         onPressed: () {},
                       ),
                     ),
                   ),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
-                  background: Stack(
-                    children: [
-                      PageView.builder(
-                        controller: _pageController,
-                        onPageChanged: (index) {
-                          setState(() {
-                            _selectedImageIndex = index;
-                          });
-                        },
-                        itemCount: _productImages.length,
-                        itemBuilder: (context, index) {
-                          return CachedNetworkImage(
-                            imageUrl: _productImages[index],
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(color: Colors.grey.shade200),
-                          );
-                        },
-                      ),
-                      // Image indicator dots
-                      Positioned(
-                        bottom: 16,
-                        left: 0,
-                        right: 0,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(_productImages.length, (index) {
-                            return Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 4),
-                              width: _selectedImageIndex == index ? 24 : 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: _selectedImageIndex == index
-                                    ? AppTheme.primary
-                                    : Colors.white.withOpacity(0.5),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                      // Image counter
-                      Positioned(
-                        top: 60,
-                        right: 16,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.6),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            '${_selectedImageIndex + 1}/${_productImages.length}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                  background: PageView.builder(
+                    controller: _pageController,
+                    itemCount: _productImages.length,
+                    itemBuilder: (context, index) {
+                      return CachedNetworkImage(
+                        imageUrl: _productImages[index],
+                        fit: BoxFit.cover,
+                      );
+                    },
                   ),
                 ),
               ),
-              // Content
-              SliverToBoxAdapter(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: AppTheme.surface,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
+              // Content Body (Mobile)
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Ready Stock Badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.check_circle, color: Colors.green, size: 14),
-                              SizedBox(width: 6),
-                              Text(
-                                'READY STOCK',
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Title
-                        Text(
-                          widget.product.name,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textMain,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Price & Rating
+                        // Price & Title
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Flexible(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (widget.product.originalPrice != null)
-                                    Text(
-                                      'Rp ${widget.product.originalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: AppTheme.textSec,
-                                        decoration: TextDecoration.lineThrough,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  Row(
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          'Rp ${widget.product.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                                          style: const TextStyle(
-                                            fontSize: 26,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppTheme.primary,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      const Text(
-                                        ' / pcs',
-                                        style: TextStyle(fontSize: 14, color: AppTheme.textSec),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.yellow.shade50,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.star, color: Colors.orange, size: 20),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    widget.product.rating.toString(),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Flexible(
-                                    child: Text(
-                                      '(${widget.product.sold})',
-                                      style: const TextStyle(fontSize: 11, color: AppTheme.textSec),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Divider(height: 32),
-                        // Store Info
-                        Row(
-                          children: [
-                            Stack(
-                              children: [
-                                CircleAvatar(
-                                  radius: 24,
-                                  backgroundImage: NetworkImage(
-                                    'https://picsum.photos/100/100?random=${widget.product.store}',
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 0,
-                                  right: 0,
-                                  child: Container(
-                                    width: 14,
-                                    height: 14,
-                                    decoration: BoxDecoration(
-                                      color: Colors.green,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.white, width: 2),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    widget.product.store,
+                                    widget.product.name,
                                     style: const TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.location_on, size: 14, color: AppTheme.textSec),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          widget.product.location,
-                                          style: const TextStyle(fontSize: 12, color: AppTheme.textSec),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Rp ${widget.product.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppTheme.primary,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            OutlinedButton(
-                              onPressed: () {},
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: AppTheme.primary),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade50,
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Text(
-                                'Toko',
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.star,
+                                      size: 16, color: Colors.orange),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    widget.product.rating.toString(),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: Colors.orange,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 24),
-                        // Thumbnail Gallery
-                        SizedBox(
-                          height: 80,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: _productImages.length,
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _selectedImageIndex = index;
-                                  });
-                                  _pageController.animateToPage(
-                                    index,
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOut,
-                                  );
-                                },
-                                child: Container(
-                                  width: 80,
-                                  height: 80,
-                                  margin: EdgeInsets.only(
-                                    right: index < _productImages.length - 1 ? 12 : 0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: _selectedImageIndex == index
-                                          ? AppTheme.primary
-                                          : Colors.grey.shade300,
-                                      width: _selectedImageIndex == index ? 2.5 : 1,
-                                    ),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: CachedNetworkImage(
-                                      imageUrl: _productImages[index],
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        // Description
-                        const Text(
-                          'Deskripsi Produk',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        // Tabs / Sections
+                        const Divider(),
+                        const SizedBox(height: 16),
+                        const Text('Deskripsi',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18)),
                         const SizedBox(height: 8),
-                        Text(
-                          widget.product.description,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: AppTheme.textSec,
-                            height: 1.5,
-                          ),
-                        ),
+                        Text(widget.product.description,
+                            style: TextStyle(
+                                color: Colors.grey.shade600, height: 1.5)),
                         const SizedBox(height: 24),
-                        // Specs
-                        const Text(
-                          'Spesifikasi',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        const Text('Spesifikasi',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18)),
                         const SizedBox(height: 16),
-                        GridView.count(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          crossAxisCount: 2,
-                          childAspectRatio: 2.5,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          children: [
-                            _buildSpecItem(Icons.scale, 'Berat', widget.product.specs.weight),
-                            _buildSpecItem(Icons.grid_view, 'Kebutuhan', widget.product.specs.coverage),
-                            _buildSpecItem(Icons.straighten, 'Jarak Reng', widget.product.specs.spacing),
-                            _buildSpecItem(Icons.shield, 'Garansi', widget.product.specs.warranty),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        // Reviews
-                        const Text(
-                          'Ulasan Pembeli',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildMobileReviewSummary(),
-                        const SizedBox(height: 16),
-                        _buildReviewItem(
-                          'Budi Santoso',
-                          5,
-                          '2 minggu lalu',
-                          'Genteng berkualitas tinggi! Pengiriman cepat dan packing rapi. Sudah dipasang dan hasilnya sangat memuaskan.',
-                        ),
-                        const SizedBox(height: 12),
-                        _buildReviewItem(
-                          'Siti Aminah',
-                          5,
-                          '1 bulan lalu',
-                          'Produk original dan kualitas terjamin. Harga bersaing dan pelayanan ramah. Recommended!',
-                        ),
-                        const SizedBox(height: 16),
-                        Center(
-                          child: OutlinedButton(
-                            onPressed: () {},
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: AppTheme.primary),
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              'Lihat Semua Ulasan',
-                              style: TextStyle(
-                                color: AppTheme.primary,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 100),
+                        _buildMobileSpecItem(
+                            'Berat', widget.product.specs.weight),
+                        _buildMobileSpecItem(
+                            'Kebutuhan', widget.product.specs.coverage),
+                        _buildMobileSpecItem(
+                            'Jarak Reng', widget.product.specs.spacing),
+                        _buildMobileSpecItem(
+                            'Garansi', widget.product.specs.warranty),
+                        const SizedBox(height: 80), // Space for bottom bar
                       ],
                     ),
                   ),
-                ),
+                ]),
               ),
             ],
           ),
-          // Bottom Action
+          // Bottom Bar for Mobile
           Positioned(
             bottom: 0,
             left: 0,
@@ -1292,173 +1115,71 @@ class _DetailScreenState extends State<DetailScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.surface,
-                border: Border(top: BorderSide(color: Colors.grey.shade100)),
+                color: Colors.white,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
-                    blurRadius: 20,
-                    offset: const Offset(0, -8),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
                   ),
                 ],
               ),
-              child: SafeArea(
-                child: Row(
-                  children: [
-                    OutlinedButton(
-                      onPressed: () {
-                        widget.onAddToCart(widget.product);
-                        Navigator.pop(context);
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        final url = Uri.parse(
+                            'https://wa.me/?text=Halo, tanya ${widget.product.name}');
+                        if (await canLaunchUrl(url)) await launchUrl(url);
                       },
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        side: BorderSide(color: Colors.grey.shade200),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: const BorderSide(color: Colors.green),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                            borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(Icons.shopping_cart, size: 20),
-                          SizedBox(height: 2),
-                          Text('Keranjang', style: TextStyle(fontSize: 10)),
-                        ],
-                      ),
+                      child: const Icon(Icons.chat, color: Colors.green),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
-                          final url = Uri.parse('https://wa.me/?text=Halo, saya tertarik dengan ${widget.product.name}');
-                          if (await canLaunchUrl(url)) {
-                            await launchUrl(url);
-                          }
-                        },
-                        icon: const Icon(Icons.chat, color: Colors.white, size: 20),
-                        label: const Text(
-                          'Pesan via WhatsApp',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF25D366),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMobileReviewSummary() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.orange.shade50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.shade100),
-      ),
-      child: Row(
-        children: [
-          Column(
-            children: [
-              Text(
-                widget.product.rating.toString(),
-                style: const TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: List.generate(5, (index) {
-                  return Icon(
-                    index < widget.product.rating.floor() ? Icons.star : Icons.star_border,
-                    color: Colors.orange,
-                    size: 16,
-                  );
-                }),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${widget.product.sold} ulasan',
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-              ),
-            ],
-          ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: Column(
-              children: [
-                _buildRatingBar(5, 0.75),
-                const SizedBox(height: 6),
-                _buildRatingBar(4, 0.15),
-                const SizedBox(height: 6),
-                _buildRatingBar(3, 0.06),
-                const SizedBox(height: 6),
-                _buildRatingBar(2, 0.03),
-                const SizedBox(height: 6),
-                _buildRatingBar(1, 0.01),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSpecItem(IconData icon, String label, String value) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.bgLight,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: AppTheme.primary, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(fontSize: 11, color: AppTheme.textSec),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textMain,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 3,
+                    child: ElevatedButton(
+                      // 👇 Panggil Logic Satpam di Mobile
+                      onPressed: _handleAddToCart,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text(
+                        'Tambah ke Keranjang',
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileSpecItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(color: Colors.grey.shade600)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );

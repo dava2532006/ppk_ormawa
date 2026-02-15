@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../utils/theme.dart';
 import '../models/user.dart';
+import '../screens/login_screen.dart'; // Import Login Screen
 
 class DesktopNavbar extends StatelessWidget {
   final int currentIndex;
@@ -21,8 +22,9 @@ class DesktopNavbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Cek apakah user null atau role-nya guest
     final isGuest = user == null || user!.role == UserRole.guest;
-    
+
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -51,7 +53,8 @@ class DesktopNavbar extends StatelessWidget {
                         color: AppTheme.primary,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.roofing, color: Colors.white, size: 24),
+                      child: const Icon(Icons.roofing,
+                          color: Colors.white, size: 24),
                     ),
                     const SizedBox(width: 12),
                     const Text(
@@ -75,13 +78,21 @@ class DesktopNavbar extends StatelessWidget {
               const SizedBox(width: 32),
               _buildNavItem('Tentang Kami', 3),
               const SizedBox(width: 40),
-              // Login Button or User Avatar
+
+              // Logic Tombol Masuk vs Profil
               if (isGuest)
                 ElevatedButton(
-                  onPressed: onLogin,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginScreen()),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -105,9 +116,12 @@ class DesktopNavbar extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+                      border: Border.all(
+                          color: Colors.white.withOpacity(0.3), width: 2),
                     ),
-                    child: const Icon(Icons.person, color: Colors.white, size: 20),
+                    // 👇 PERBAIKAN: Langsung pakai Icon saja biar aman (karena field image tidak ada)
+                    child:
+                        const Icon(Icons.person, color: Colors.white, size: 20),
                   ),
                 ),
             ],
