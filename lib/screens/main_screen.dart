@@ -82,6 +82,10 @@ class _MainScreenState extends State<MainScreen> {
         builder: (_) => ProfileScreen(
           user: widget.user,
           onProductClick: _onProductClick,
+          onNavigate: (index) {
+            Navigator.pop(context);
+            setState(() => _currentIndex = index);
+          },
           onLogout: () {
             Navigator.pushAndRemoveUntil(
               context,

@@ -712,6 +712,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMobileHeader() {
+    final isGuest = widget.user == null || widget.user!.role == UserRole.guest;
+    
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -752,7 +754,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          const SizedBox(width: 40),
+          // Profile button
+          if (isGuest)
+            const SizedBox(width: 40)
+          else
+            IconButton(
+              onPressed: widget.onProfileClick,
+              icon: const Icon(Icons.person, color: Colors.white),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.white.withOpacity(0.1),
+              ),
+            ),
         ],
       ),
     );
