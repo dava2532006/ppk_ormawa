@@ -2,7 +2,7 @@ import '../models/product.dart';
 
 final List<Product> mockProducts = [
   Product(
-    id: 1,
+    id: '1',
     name: "Genteng Morando Glazur Premium",
     category: "Tanah Liat",
     price: 3500,
@@ -12,7 +12,8 @@ final List<Product> mockProducts = [
     image: "https://picsum.photos/400/400?random=1",
     store: "Sinar Jati Roof",
     location: "Jatiwangi, Majalengka",
-    description: "Genteng Morando Glazur Premium kami dibuat dari tanah liat pilihan asli Jatiwangi. Melalui proses pembakaran suhu tinggi (1000°C) menghasilkan genteng yang sangat kuat, presisi, dan tahan terhadap lumut.",
+    description:
+        "Genteng Morando Glazur Premium kami dibuat dari tanah liat pilihan asli Jatiwangi. Melalui proses pembakaran suhu tinggi (1000°C) menghasilkan genteng yang sangat kuat, presisi, dan tahan terhadap lumut.",
     specs: ProductSpecs(
       weight: "2.8 kg",
       coverage: "18 pcs/m²",
@@ -23,7 +24,7 @@ final List<Product> mockProducts = [
     inStock: true,
   ),
   Product(
-    id: 2,
+    id: '2',
     name: "Genteng Keramik M-Class Maroon",
     category: "Keramik",
     price: 9200,
@@ -32,7 +33,8 @@ final List<Product> mockProducts = [
     image: "https://picsum.photos/400/400?random=2",
     store: "M-Class Official",
     location: "Jakarta",
-    description: "Genteng keramik M-Class dengan warna Maroon yang elegan. Tahan lama dan warna tidak mudah pudar.",
+    description:
+        "Genteng keramik M-Class dengan warna Maroon yang elegan. Tahan lama dan warna tidak mudah pudar.",
     specs: ProductSpecs(
       weight: "3.2 kg",
       coverage: "14 pcs/m²",
@@ -42,7 +44,7 @@ final List<Product> mockProducts = [
     inStock: true,
   ),
   Product(
-    id: 3,
+    id: '3',
     name: "Genteng Beton Flat Minimalis",
     category: "Beton",
     price: 5500,
@@ -51,7 +53,8 @@ final List<Product> mockProducts = [
     image: "https://picsum.photos/400/400?random=3",
     store: "Beton Perkasa",
     location: "Surabaya",
-    description: "Desain minimalis modern untuk rumah masa kini. Kuat pijakan dan presisi interlock.",
+    description:
+        "Desain minimalis modern untuk rumah masa kini. Kuat pijakan dan presisi interlock.",
     specs: ProductSpecs(
       weight: "4.2 kg",
       coverage: "10 pcs/m²",
@@ -61,7 +64,7 @@ final List<Product> mockProducts = [
     inStock: false,
   ),
   Product(
-    id: 4,
+    id: '4',
     name: "Genteng Plentong Bulat Tradisional",
     category: "Tanah Liat",
     price: 1800,
@@ -71,7 +74,8 @@ final List<Product> mockProducts = [
     image: "https://picsum.photos/400/400?random=4",
     store: "Berkah Abadi",
     location: "Jatiwangi",
-    description: "Genteng klasik ekonomis yang melegenda. Cocok untuk renovasi rumah lama.",
+    description:
+        "Genteng klasik ekonomis yang melegenda. Cocok untuk renovasi rumah lama.",
     specs: ProductSpecs(
       weight: "1.5 kg",
       coverage: "25 pcs/m²",
@@ -82,7 +86,7 @@ final List<Product> mockProducts = [
     inStock: true,
   ),
   Product(
-    id: 5,
+    id: '5',
     name: "Genteng Metal Pasir",
     category: "Metal",
     price: 35000,
@@ -91,7 +95,8 @@ final List<Product> mockProducts = [
     image: "https://picsum.photos/400/400?random=5",
     store: "Baja Ringan Jaya",
     location: "Bandung",
-    description: "Ringan dan tahan gempa. Dilapisi pasir untuk meredam suara hujan.",
+    description:
+        "Ringan dan tahan gempa. Dilapisi pasir untuk meredam suara hujan.",
     specs: ProductSpecs(
       weight: "0.5 kg",
       coverage: "1.62 pcs/m²",
@@ -101,7 +106,7 @@ final List<Product> mockProducts = [
     inStock: false,
   ),
   Product(
-    id: 6,
+    id: '6',
     name: "Genteng Kodok Sokka Kebumen",
     category: "Tanah Liat",
     price: 2100,
@@ -110,7 +115,8 @@ final List<Product> mockProducts = [
     image: "https://picsum.photos/400/400?random=6",
     store: "Sokka Asli",
     location: "Kebumen",
-    description: "Khas Kebumen dengan sistem penguncian ganda yang rapat anti bocor.",
+    description:
+        "Khas Kebumen dengan sistem penguncian ganda yang rapat anti bocor.",
     specs: ProductSpecs(
       weight: "1.8 kg",
       coverage: "22 pcs/m²",

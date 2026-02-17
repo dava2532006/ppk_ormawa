@@ -2,11 +2,14 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/theme.dart';
-import '../models/user.dart';
+import '../models/user.dart' as app_models;
 import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 import 'main_screen.dart';
 import '../services/auth_service.dart';
+import 'home_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'admin/admin_dashboard_screen.dart'; // 👈 Tambahkan ini
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -320,7 +323,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 52,
                     child: ElevatedButton(
                       onPressed: () async {
-                        // 1. Validasi Input Kosong
                         if (_identifierController.text.isEmpty ||
                             _passwordController.text.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -332,7 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           return;
                         }
 
-                        // 2. Tampilkan Loading (Spinner)
+                        // 2. Tampilkan Loading (Tetap sama)
                         showDialog(
                           context: context,
                           barrierDismissible: false,
@@ -343,40 +345,103 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
 
                         try {
-                          // 3. Panggil Backend Supabase
-                          await AuthService().signIn(
-                            _identifierController.text.trim(),
-                            _passwordController.text,
+                          final supabase = Supabase.instance.client;
+
+                          // 3. Login ke Supabase Auth
+                          final AuthResponse response =
+                              await supabase.auth.signInWithPassword(
+                            email: _identifierController.text.trim(),
+                            password: _passwordController.text,
                           );
 
-                          // 4. Tutup Loading jika sukses
+                          if (response.user == null) {
+                            throw 'Login gagal. Silakan coba lagi.';
+                          }
+
+                          // 4. Ambil Data ROLE dari tabel 'profiles'
+                          // Ini langkah penting yang kita tambahkan
+                          final profileData = await supabase
+                              .from('profiles')
+                              .select()
+                              .eq('id', response.user!.id)
+                              .maybeSingle();
+
+                          // Cek Role-nya apa
+                          String roleString = 'customer'; // Default
+                          String fullName = 'User';
+
+                          if (profileData != null) {
+                            roleString = profileData['role'] ?? 'customer';
+                            fullName = profileData['full_name'] ?? 'User';
+                          }
+
+                          // Konversi String ke Enum UserRole
+                          // Sesuaikan ini dengan nama Enum di file models/user.dart kamu
+                          // 1. Tentukan Default Role (Pakai app_models)
+                          app_models.UserRole userRole =
+                              app_models.UserRole.guest;
+
+                          // 2. Cek Logika Role (Pakai app_models)
+                          if (roleString == 'admin') {
+                            userRole = app_models.UserRole.admin;
+                          } else if (roleString == 'customer') {
+                            // Sesuaikan dengan nama enum di modelmu (user atau customer)
+                            userRole = app_models.UserRole.user;
+                          }
+
+                          // 3. Buat Object User Baru (Pakai app_models)
+                          final user = app_models.User(
+                            name: fullName,
+                            // response.user punya Supabase (JANGAN pakai app_models)
+                            email: response.user!.email ?? '',
+                            role: userRole,
+                          );
+
+                          // 5. Tutup Loading
                           if (mounted) Navigator.pop(context);
 
-                          // 5. Ambil Data User Asli & Pindah Halaman
+                          // 6. Navigasi Berdasarkan Role
                           if (mounted) {
-                            final user = AuthService().getCurrentUser();
+                            if (userRole == app_models.UserRole.admin) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Berhasil masuk sebagai ADMIN"),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
 
-                            // Jika user null (aneh tapi mungkin terjadi), lempar error
-                            if (user == null)
-                              throw 'Gagal mengambil data user.';
-
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MainScreen(user: user),
-                              ),
-                            );
+                              // 👇 PERUBAHAN UTAMA: Arahkan ke AdminDashboardScreen
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AdminDashboardScreen()),
+                              );
+                            } else {
+                              // User Biasa tetap ke MainScreen
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        MainScreen(user: user)),
+                              );
+                            }
                           }
                         } catch (e) {
-                          // 6. Jika Error (Password salah / User tidak ada)
+                          // Error Handling
                           if (mounted)
                             Navigator.pop(context); // Tutup loading dulu
+
+                          String errorMessage = e.toString();
+                          if (e is AuthException) {
+                            errorMessage =
+                                e.message; // Pesan error resmi dari Supabase
+                          }
 
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                    'Login Gagal: ${e.toString().replaceAll("Exception:", "")}'),
+                                content: Text('Login Gagal: $errorMessage'),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -450,10 +515,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: OutlinedButton(
                           onPressed: () {
                             // Create guest user
-                            final guestUser = User(
+                            final guestUser = app_models.User(
                               name: 'Guest',
                               email: 'guest@gentengforyou.com',
-                              role: UserRole.guest,
+                              role: app_models.UserRole.guest,
                             );
 
                             Navigator.pushReplacement(

@@ -1,5 +1,6 @@
 class Product {
-  final int id;
+  // PERUBAHAN 1: ID harus String karena Supabase pakai UUID
+  final String id;
   final String name;
   final String category;
   final int price;
@@ -13,6 +14,9 @@ class Product {
   final ProductSpecs specs;
   final bool isPromo;
   final bool inStock;
+
+  // Tambahan: Kita butuh data stok asli (angka) untuk logika admin
+  final int realStock;
 
   Product({
     required this.id,
@@ -29,7 +33,59 @@ class Product {
     required this.specs,
     this.isPromo = false,
     this.inStock = true,
+    this.realStock = 0, // Default 0
   });
+
+  // --- JEMBATAN DARI SUPABASE KE UI (PENTING) ---
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      // Konversi ID ke String
+      id: json['id'].toString(),
+
+      name: json['name'] ?? 'Tanpa Nama',
+      category: json['category'] ?? 'Umum',
+
+      // Pastikan harga jadi Integer
+      price: (json['price'] as num?)?.toInt() ?? 0,
+
+      // --- DATA DUMMY (Karena belum ada di Database) ---
+      // Kita isi nilai default supaya UI temanmu tidak error
+      originalPrice: null,
+      rating: 4.8, // Nilai default biar terlihat bagus
+      sold: 100, // Nilai default
+      store: 'Jatiwangi Official',
+      location: 'Majalengka',
+      isPromo: false,
+
+      // Ambil stok dari DB
+      realStock: json['stock'] ?? 0,
+      inStock: (json['stock'] ?? 0) > 0, // Jika stok > 0 berarti In Stock
+
+      image: json['image_url'] ?? 'https://via.placeholder.com/300',
+      description: json['description'] ?? 'Belum ada deskripsi.',
+
+      // Default Specs (Nanti bisa kita tambah kolom JSON di DB)
+      specs: ProductSpecs(
+        weight: '2 kg',
+        coverage: '12 pcs/m2',
+        spacing: '30 cm',
+        warranty: '10 Tahun',
+      ),
+    );
+  }
+
+  // --- JEMBATAN DARI UI KE SUPABASE (Untuk Upload) ---
+  Map<String, dynamic> toJson() {
+    return {
+      // 'id': id, // ID dibuat otomatis oleh Supabase
+      'name': name,
+      'description': description,
+      'price': price,
+      'stock': realStock, // Simpan stok asli
+      'category': category,
+      'image_url': image,
+    };
+  }
 }
 
 class ProductSpecs {
@@ -57,4 +113,3 @@ class CartItem {
     this.selected = true,
   });
 }
-// Tambahkan ini di dalam class Product

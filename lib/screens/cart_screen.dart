@@ -7,9 +7,10 @@ import '../widgets/desktop_navbar.dart';
 
 class CartScreen extends StatefulWidget {
   final List<CartItem> items;
-  final Function(int, int) onUpdateQuantity;
-  final Function(int) onRemove;
-  final Function(int)? onNavigate;
+  // 👇 PERBAIKAN: Ubah tipe ID dari int ke String
+  final Function(String, int) onUpdateQuantity;
+  final Function(String) onRemove;
+  final Function(int)? onNavigate; // Ini navigasi navbar (tetap int)
   final int currentIndex;
 
   const CartScreen({
@@ -27,7 +28,8 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   late List<CartItem> _items;
-  final Map<int, TextEditingController> _quantityControllers = {};
+  // 👇 PERBAIKAN: Key Map ubah ke String
+  final Map<String, TextEditingController> _quantityControllers = {};
 
   @override
   void initState() {
@@ -48,7 +50,8 @@ class _CartScreenState extends State<CartScreen> {
     super.dispose();
   }
 
-  void _toggleSelection(int productId) {
+  // 👇 PERBAIKAN: Parameter productId jadi String
+  void _toggleSelection(String productId) {
     setState(() {
       final index = _items.indexWhere((item) => item.product.id == productId);
       if (index != -1) {
@@ -61,7 +64,8 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
-  void _updateQuantity(int productId, int delta) {
+  // 👇 PERBAIKAN: Parameter productId jadi String
+  void _updateQuantity(String productId, int delta) {
     setState(() {
       final index = _items.indexWhere((item) => item.product.id == productId);
       if (index != -1) {
@@ -77,10 +81,11 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
-  void _setQuantityFromText(int productId, String text) {
+  // 👇 PERBAIKAN: Parameter productId jadi String
+  void _setQuantityFromText(String productId, String text) {
     final newQuantity = int.tryParse(text) ?? 1;
     if (newQuantity < 1) return;
-    
+
     setState(() {
       final index = _items.indexWhere((item) => item.product.id == productId);
       if (index != -1) {
@@ -130,7 +135,8 @@ class _CartScreenState extends State<CartScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey.shade300),
+                  Icon(Icons.shopping_cart_outlined,
+                      size: 80, color: Colors.grey.shade300),
                   const SizedBox(height: 16),
                   const Text(
                     'Keranjang belanja Anda kosong',
@@ -169,7 +175,8 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildDesktopLayout(List<CartItem> selectedItems, int subtotal, int totalItems) {
+  Widget _buildDesktopLayout(
+      List<CartItem> selectedItems, int subtotal, int totalItems) {
     return Scaffold(
       backgroundColor: AppTheme.bgLight,
       body: Column(
@@ -189,7 +196,8 @@ class _CartScreenState extends State<CartScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey.shade300),
+                            Icon(Icons.shopping_cart_outlined,
+                                size: 80, color: Colors.grey.shade300),
                             const SizedBox(height: 16),
                             const Text(
                               'Keranjang belanja Anda kosong',
@@ -208,10 +216,12 @@ class _CartScreenState extends State<CartScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         const Text(
                                           'Keranjang Belanja',
@@ -233,8 +243,11 @@ class _CartScreenState extends State<CartScreen> {
                                     TextButton.icon(
                                       onPressed: () {
                                         setState(() {
-                                          final allSelected = _items.every((item) => item.selected);
-                                          for (var i = 0; i < _items.length; i++) {
+                                          final allSelected = _items
+                                              .every((item) => item.selected);
+                                          for (var i = 0;
+                                              i < _items.length;
+                                              i++) {
                                             _items[i] = CartItem(
                                               product: _items[i].product,
                                               quantity: _items[i].quantity,
@@ -250,7 +263,9 @@ class _CartScreenState extends State<CartScreen> {
                                         color: AppTheme.primary,
                                       ),
                                       label: Text(
-                                        _items.every((item) => item.selected) ? 'Hapus Semua' : 'Pilih Semua',
+                                        _items.every((item) => item.selected)
+                                            ? 'Hapus Semua'
+                                            : 'Pilih Semua',
                                         style: const TextStyle(
                                           color: AppTheme.primary,
                                           fontWeight: FontWeight.bold,
@@ -273,7 +288,8 @@ class _CartScreenState extends State<CartScreen> {
                                   Expanded(
                                     child: Center(
                                       child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.shopping_bag_outlined,
@@ -301,7 +317,8 @@ class _CartScreenState extends State<CartScreen> {
                             width: 380,
                             child: Column(
                               children: [
-                                _buildDesktopSummary(subtotal, totalItems, selectedItems),
+                                _buildDesktopSummary(
+                                    subtotal, totalItems, selectedItems),
                               ],
                             ),
                           ),
@@ -322,7 +339,10 @@ class _CartScreenState extends State<CartScreen> {
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: item.selected ? AppTheme.primary.withOpacity(0.3) : Colors.grey.shade100),
+        border: Border.all(
+            color: item.selected
+                ? AppTheme.primary.withOpacity(0.3)
+                : Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -347,7 +367,8 @@ class _CartScreenState extends State<CartScreen> {
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(color: Colors.grey.shade100),
+                  placeholder: (context, url) =>
+                      Container(color: Colors.grey.shade100),
                 ),
               ),
               const SizedBox(width: 12),
@@ -441,7 +462,8 @@ class _CartScreenState extends State<CartScreen> {
                           contentPadding: EdgeInsets.zero,
                           isDense: true,
                         ),
-                        onSubmitted: (value) => _setQuantityFromText(item.product.id, value),
+                        onSubmitted: (value) =>
+                            _setQuantityFromText(item.product.id, value),
                       ),
                     ),
                     _buildMobileQuantityButton(
@@ -459,12 +481,15 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildMobileQuantityButton(IconData icon, VoidCallback onPressed, bool disabled) {
+  Widget _buildMobileQuantityButton(
+      IconData icon, VoidCallback onPressed, bool disabled) {
     return Container(
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: disabled ? Colors.grey.shade100 : (icon == Icons.add ? AppTheme.primary : Colors.white),
+        color: disabled
+            ? Colors.grey.shade100
+            : (icon == Icons.add ? AppTheme.primary : Colors.white),
         borderRadius: BorderRadius.circular(8),
         boxShadow: disabled
             ? null
@@ -492,7 +517,9 @@ class _CartScreenState extends State<CartScreen> {
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: item.selected ? AppTheme.primary.withOpacity(0.3) : Colors.grey.shade200,
+          color: item.selected
+              ? AppTheme.primary.withOpacity(0.3)
+              : Colors.grey.shade200,
           width: item.selected ? 2 : 1,
         ),
         boxShadow: [
@@ -509,7 +536,8 @@ class _CartScreenState extends State<CartScreen> {
             value: item.selected,
             onChanged: (value) => _toggleSelection(item.product.id),
             activeColor: AppTheme.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
           ),
           const SizedBox(width: 12),
           ClipRRect(
@@ -519,7 +547,8 @@ class _CartScreenState extends State<CartScreen> {
               width: isDesktop ? 100 : 80,
               height: isDesktop ? 100 : 80,
               fit: BoxFit.cover,
-              placeholder: (context, url) => Container(color: Colors.grey.shade100),
+              placeholder: (context, url) =>
+                  Container(color: Colors.grey.shade100),
             ),
           ),
           const SizedBox(width: 16),
@@ -618,7 +647,8 @@ class _CartScreenState extends State<CartScreen> {
                           contentPadding: EdgeInsets.zero,
                           isDense: true,
                         ),
-                        onSubmitted: (value) => _setQuantityFromText(item.product.id, value),
+                        onSubmitted: (value) =>
+                            _setQuantityFromText(item.product.id, value),
                       ),
                     ),
                     _buildQuantityButton(
@@ -636,7 +666,8 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _buildQuantityButton(IconData icon, VoidCallback onPressed, bool disabled) {
+  Widget _buildQuantityButton(
+      IconData icon, VoidCallback onPressed, bool disabled) {
     return Container(
       width: 36,
       height: 36,
@@ -649,13 +680,16 @@ class _CartScreenState extends State<CartScreen> {
       child: IconButton(
         icon: Icon(icon, size: 18),
         onPressed: disabled ? null : onPressed,
-        color: icon == Icons.add ? Colors.white : (disabled ? Colors.grey.shade400 : AppTheme.textMain),
+        color: icon == Icons.add
+            ? Colors.white
+            : (disabled ? Colors.grey.shade400 : AppTheme.textMain),
         padding: EdgeInsets.zero,
       ),
     );
   }
 
-  Widget _buildDesktopSummary(int subtotal, int totalItems, List<CartItem> selectedItems) {
+  Widget _buildDesktopSummary(
+      int subtotal, int totalItems, List<CartItem> selectedItems) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -684,7 +718,8 @@ class _CartScreenState extends State<CartScreen> {
           const SizedBox(height: 24),
           _buildSummaryRow('Total Barang', '$totalItems pcs'),
           const SizedBox(height: 12),
-          _buildSummaryRow('Estimasi Berat', '~${(totalItems * 2.5).toStringAsFixed(0)} kg'),
+          _buildSummaryRow(
+              'Estimasi Berat', '~${(totalItems * 2.5).toStringAsFixed(0)} kg'),
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 24),
@@ -734,7 +769,9 @@ class _CartScreenState extends State<CartScreen> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: selectedItems.isEmpty ? Colors.grey.shade300 : AppTheme.primary,
+                backgroundColor: selectedItems.isEmpty
+                    ? Colors.grey.shade300
+                    : AppTheme.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -833,7 +870,8 @@ class _CartScreenState extends State<CartScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Total Barang', style: TextStyle(color: AppTheme.textSec)),
+              const Text('Total Barang',
+                  style: TextStyle(color: AppTheme.textSec)),
               Text(
                 '$totalItems pcs',
                 style: const TextStyle(fontWeight: FontWeight.w600),
@@ -844,7 +882,8 @@ class _CartScreenState extends State<CartScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Estimasi Berat', style: TextStyle(color: AppTheme.textSec)),
+              const Text('Estimasi Berat',
+                  style: TextStyle(color: AppTheme.textSec)),
               Text(
                 '~${(totalItems * 2.5).toStringAsFixed(0)} kg',
                 style: const TextStyle(fontWeight: FontWeight.w600),

@@ -48,11 +48,13 @@ class _MainScreenState extends State<MainScreen> {
 
   void _addToCart(Product product) {
     setState(() {
-      final existingIndex = _cartItems.indexWhere((item) => item.product.id == product.id);
+      final existingIndex =
+          _cartItems.indexWhere((item) => item.product.id == product.id);
       if (existingIndex != -1) {
         _cartItems[existingIndex].quantity += 50;
       } else {
-        _cartItems.add(CartItem(product: product, quantity: 50, selected: true));
+        _cartItems
+            .add(CartItem(product: product, quantity: 50, selected: true));
       }
     });
     ScaffoldMessenger.of(context).showSnackBar(
@@ -60,16 +62,18 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void _updateCartQuantity(int productId, int delta) {
+  void _updateCartQuantity(String productId, int delta) {
     setState(() {
-      final index = _cartItems.indexWhere((item) => item.product.id == productId);
+      final index =
+          _cartItems.indexWhere((item) => item.product.id == productId);
       if (index != -1) {
-        _cartItems[index].quantity = (_cartItems[index].quantity + delta).clamp(0, 999999);
+        _cartItems[index].quantity =
+            (_cartItems[index].quantity + delta).clamp(0, 999999);
       }
     });
   }
 
-  void _removeCartItem(int productId) {
+  void _removeCartItem(String productId) {
     setState(() {
       _cartItems.removeWhere((item) => item.product.id == productId);
     });
@@ -101,7 +105,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 768;
-    
+
     final screens = [
       HomeScreen(
         onProductClick: _onProductClick,
