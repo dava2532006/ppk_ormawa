@@ -1,22 +1,23 @@
 class Product {
-  // PERUBAHAN 1: ID harus String karena Supabase pakai UUID
-  final String id;
-  final String name;
-  final String category;
-  final int price;
+  // --- FIELD UTAMA (Sesuai Database Supabase) ---
+  final String id; // Tipe String (UUID)
+  final String name; // Kolom: name
+  final int price; // Kolom: price
+  final String description; // Kolom: description
+  final String category; // Kolom: category
+  final String image; // Kolom: image_url (Di UI kita sebut 'image')
+  final int realStock; // Kolom: stock (Di UI kita sebut 'realStock')
+
+  // --- FIELD TAMBAHAN (Untuk Keperluan UI Temanmu) ---
+  // Kita beri nilai default nanti karena belum ada di database
   final int? originalPrice;
   final double rating;
   final int sold;
-  final String image;
   final String store;
   final String location;
-  final String description;
   final ProductSpecs specs;
   final bool isPromo;
   final bool inStock;
-
-  // Tambahan: Kita butuh data stok asli (angka) untuk logika admin
-  final int realStock;
 
   Product({
     required this.id,
@@ -33,60 +34,59 @@ class Product {
     required this.specs,
     this.isPromo = false,
     this.inStock = true,
-    this.realStock = 0, // Default 0
+    required this.realStock,
   });
 
-  // --- JEMBATAN DARI SUPABASE KE UI (PENTING) ---
+  // --- LOGIKA PENERJEMAH (Supabase JSON -> Object Product) ---
   factory Product.fromJson(Map<String, dynamic> json) {
+    // Ambil stok untuk logika inStock
+    final int stockFromDb = json['stock'] ?? 0;
+
     return Product(
-      // Konversi ID ke String
+      // 1. DATA DARI DATABASE (Wajib Ada)
       id: json['id'].toString(),
-
       name: json['name'] ?? 'Tanpa Nama',
+      price: (json['price'] as num?)?.toInt() ?? 0, // Pastikan jadi int
+      description: json['description'] ?? 'Tidak ada deskripsi.',
       category: json['category'] ?? 'Umum',
+      image: json['image_url'] ??
+          'https://via.placeholder.com/300', // Gambar default jika kosong
+      realStock: stockFromDb,
 
-      // Pastikan harga jadi Integer
-      price: (json['price'] as num?)?.toInt() ?? 0,
-
-      // --- DATA DUMMY (Karena belum ada di Database) ---
-      // Kita isi nilai default supaya UI temanmu tidak error
-      originalPrice: null,
-      rating: 4.8, // Nilai default biar terlihat bagus
-      sold: 100, // Nilai default
+      // 2. DATA UI (Diisi Default agar Error Hilang)
+      originalPrice: null, // Bisa diisi logika diskon nanti
+      rating: 4.8, // Rating palsu biar terlihat bagus
+      sold: 0, // Belum ada data penjualan
       store: 'Jatiwangi Official',
-      location: 'Majalengka',
+      location: 'Majalengka, Jawa Barat',
       isPromo: false,
+      inStock: stockFromDb > 0, // Jika stok > 0 maka true
 
-      // Ambil stok dari DB
-      realStock: json['stock'] ?? 0,
-      inStock: (json['stock'] ?? 0) > 0, // Jika stok > 0 berarti In Stock
-
-      image: json['image_url'] ?? 'https://via.placeholder.com/300',
-      description: json['description'] ?? 'Belum ada deskripsi.',
-
-      // Default Specs (Nanti bisa kita tambah kolom JSON di DB)
+      // Spesifikasi Dummy (Nanti bisa ditambah kolom JSON di DB jika mau)
       specs: ProductSpecs(
         weight: '2 kg',
-        coverage: '12 pcs/m2',
+        coverage: '12 pcs/m²',
         spacing: '30 cm',
-        warranty: '10 Tahun',
+        warranty: 'Garansi 10 Tahun',
       ),
     );
   }
 
-  // --- JEMBATAN DARI UI KE SUPABASE (Untuk Upload) ---
+  // --- LOGIKA UPLOAD (Object Product -> Supabase JSON) ---
   Map<String, dynamic> toJson() {
     return {
-      // 'id': id, // ID dibuat otomatis oleh Supabase
       'name': name,
-      'description': description,
       'price': price,
-      'stock': realStock, // Simpan stok asli
+      'stock': realStock,
+      'description': description,
       'category': category,
       'image_url': image,
+      // 'id' tidak dikirim karena dibuat otomatis oleh Database
     };
   }
 }
+
+// --- CLASS PENDUKUNG ---
 
 class ProductSpecs {
   final String weight;
