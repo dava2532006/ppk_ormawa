@@ -1,8 +1,13 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/theme.dart';
-import 'admin/admin_dashboard_screen.dart'; // Import Admin Dashboard
+import '../models/user.dart' as app_models;
+import 'forgot_password_screen.dart';
+import 'register_screen.dart';
+import 'main_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'admin/admin_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,24 +17,19 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _identifierController = TextEditingController(); // Hapus dummy text
+  final _identifierController =
+      TextEditingController(text: 'customer@jatiwangi.com');
   final _passwordController = TextEditingController();
-
   final _identifierFocus = FocusNode();
   final _passwordFocus = FocusNode();
-
   bool _rememberMe = false;
   bool _obscurePassword = true;
   bool _isIdentifierFocused = false;
   bool _isPasswordFocused = false;
 
-  // State Loading Baru
-  bool _isLoading = false;
-
   @override
   void initState() {
     super.initState();
-    // Listener Focus Node (Sesuai UI aslimu)
     _identifierFocus.addListener(() {
       setState(() => _isIdentifierFocused = _identifierFocus.hasFocus);
     });
@@ -47,298 +47,637 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // --- LOGIKA SUPABASE (BARU) ---
-  Future<void> _handleLogin() async {
-    setState(() => _isLoading = true);
-
-    try {
-      final email = _identifierController.text.trim();
-      final password = _passwordController.text.trim();
-
-      // 1. Login ke Supabase
-      final AuthResponse res =
-          await Supabase.instance.client.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-
-      if (res.user == null) throw const AuthException("Login Gagal");
-
-      if (mounted) {
-        // 2. Cek Role Admin (Sederhana)
-        if (email.contains('admin')) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-                builder: (context) => const AdminDashboardScreen()),
-            (route) => false,
-          );
-        } else {
-          // 3. User Biasa -> Tutup Login Screen (Balik ke Main/Detail)
-          // Jika bisa di-pop (dibuka dari detail), pop. Jika tidak, diam saja (MainScreen auto update)
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-          }
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text("Berhasil Masuk!"),
-                backgroundColor: Colors.green),
-          );
-        }
-      }
-    } on AuthException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text("Login Gagal: ${e.message}"),
-              backgroundColor: Colors.red),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Terjadi kesalahan koneksi"),
-              backgroundColor: Colors.red),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth >= 1024;
+
+    if (isDesktop) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Row(
+          children: [
+            Expanded(flex: 60, child: _buildHeroSection()),
+            Expanded(flex: 40, child: _buildFormSection()),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      body: Stack(
-        children: [
-          // Background (Bisa dikembalikan kalau ada gambar aset)
-          Container(color: Colors.white),
+      backgroundColor: Colors.white,
+      body: _buildFormSection(),
+    );
+  }
 
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 40),
-                  // Header (Sesuai aslimu)
-                  Center(
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primary.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.home_work,
-                              size: 48, color: AppTheme.primary),
-                        ),
-                        const SizedBox(height: 24),
-                        const Text(
-                          "Selamat Datang",
-                          style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.textMain),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Masuk untuk melanjutkan belanja",
-                          style: TextStyle(
-                              fontSize: 14, color: Colors.grey.shade500),
-                        ),
-                      ],
+  Widget _buildHeroSection() {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.network(
+            'https://lh3.googleusercontent.com/aida-public/AB6AXuCFvuCD29hA4jNUrQZJj4CsxND6mgHb8Q5hmXrhkMPDAJyUNmilPzm6HqSrdYEITe2V9rVGtYP7xI2jgE2obE1xVdVtep_tMJ8yb5FEGF8pejHWZRtnimINVRYLkieN76gD7N8-ywMq9z1YGpgOeHzXYFRxskQ4afAaWnF08ASGOrgYfmW7LZtmi5DGT4W4PY6tBWVhoMJ8GqLTDdaacseEEkzatsmTTk3yxYZ7H8catF_NuEnnLSD69NbZamvnSKDImjgiHSaFnSU',
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.black.withOpacity(0.4),
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.1),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 32,
+          left: 32,
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withOpacity(0.3)),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(24),
+                onTap: () => Navigator.pop(context),
+                child:
+                    const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 48,
+          left: 48,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 384),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.25),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.verified,
+                          color: Colors.white, size: 24),
                     ),
-                  ),
-                  const SizedBox(height: 40),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'JAMINAN KEASLIAN',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.95),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            '100% PRODUK JATIWANGI ASLI',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
-                  // Input Fields (Menggunakan Widget Custom Kamu di bawah)
-                  _buildInputContainer(
-                    label: "Email",
+  Widget _buildFormSection() {
+    final isDesktop = MediaQuery.of(context).size.width >= 1024;
+
+    return Container(
+      height: double.infinity,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(
+          horizontal: isDesktop ? 48 : 32,
+          vertical: isDesktop ? 32 : 48,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppTheme.primary,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primary.withOpacity(0.2),
+                    blurRadius: 16,
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.roofing, color: Colors.white, size: 28),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Gentengforyou',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
+            ),
+            SizedBox(height: isDesktop ? 28 : 40),
+            Text(
+              'Masuk',
+              style: TextStyle(
+                fontSize: isDesktop ? 32 : 36,
+                fontWeight: FontWeight.w800,
+                color: AppTheme.textMain,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Kelola kebutuhan atap rumah Anda dengan mudah.',
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.grey.shade500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: isDesktop ? 28 : 40),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 448),
+              child: Column(
+                children: [
+                  _buildFloatingInput(
                     controller: _identifierController,
                     focusNode: _identifierFocus,
+                    label: 'Email atau No. Handphone',
                     isFocused: _isIdentifierFocused,
-                    prefixIcon: Icons.email_outlined,
                   ),
                   const SizedBox(height: 20),
-                  _buildInputContainer(
-                    label: "Password",
+                  _buildFloatingInput(
                     controller: _passwordController,
                     focusNode: _passwordFocus,
+                    label: 'Kata Sandi',
                     isFocused: _isPasswordFocused,
-                    prefixIcon: Icons.lock_outline,
-                    isPassword: true,
-                  ),
-
-                  // Remember Me & Forgot Pass
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: Checkbox(
-                                value: _rememberMe,
-                                activeColor: AppTheme.primary,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4)),
-                                onChanged: (val) =>
-                                    setState(() => _rememberMe = val!),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text("Ingat Saya",
-                                style: TextStyle(
-                                    color: Colors.grey.shade600, fontSize: 13)),
-                          ],
-                        ),
-                        _buildFooterLink("Lupa Password?"),
-                      ],
+                    obscureText: _obscurePassword,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: Colors.grey.shade400,
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Tombol Masuk (Updated dengan Loading)
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: Checkbox(
+                              value: _rememberMe,
+                              onChanged: (v) =>
+                                  setState(() => _rememberMe = v ?? false),
+                              activeColor: AppTheme.primary,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4)),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Ingat Saya',
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade600),
+                          ),
+                        ],
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const ForgotPasswordScreen()),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text(
+                          'Lupa Kata Sandi?',
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.primary),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
-                    height: 56,
+                    height: 52,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
+                      onPressed: () async {
+                        if (_identifierController.text.isEmpty ||
+                            _passwordController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Email dan Password harus diisi!'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+
+                        // 2. Tampilkan Loading (Tetap sama)
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => const Center(
+                            child: CircularProgressIndicator(
+                                color: AppTheme.primary),
+                          ),
+                        );
+
+                        try {
+                          final supabase = Supabase.instance.client;
+
+                          // 3. Login ke Supabase Auth
+                          final AuthResponse response =
+                              await supabase.auth.signInWithPassword(
+                            email: _identifierController.text.trim(),
+                            password: _passwordController.text,
+                          );
+
+                          if (response.user == null) {
+                            throw 'Login gagal. Silakan coba lagi.';
+                          }
+
+                          // 4. Ambil Data ROLE dari tabel 'profiles'
+                          // Ini langkah penting yang kita tambahkan
+                          final profileData = await supabase
+                              .from('profiles')
+                              .select()
+                              .eq('id', response.user!.id)
+                              .maybeSingle();
+
+                          // Cek Role-nya apa
+                          String roleString = 'customer'; // Default
+                          String fullName = 'User';
+
+                          if (profileData != null) {
+                            roleString = profileData['role'] ?? 'customer';
+                            fullName = profileData['full_name'] ?? 'User';
+                          }
+
+                          // Konversi String ke Enum UserRole
+                          // Sesuaikan ini dengan nama Enum di file models/user.dart kamu
+                          // 1. Tentukan Default Role (Pakai app_models)
+                          app_models.UserRole userRole =
+                              app_models.UserRole.guest;
+
+                          // 2. Cek Logika Role (Pakai app_models)
+                          if (roleString == 'admin') {
+                            userRole = app_models.UserRole.admin;
+                          } else if (roleString == 'customer') {
+                            // Sesuaikan dengan nama enum di modelmu (user atau customer)
+                            userRole = app_models.UserRole.user;
+                          }
+
+                          // 3. Buat Object User Baru (Pakai app_models)
+                          final user = app_models.User(
+                            name: fullName,
+                            // response.user punya Supabase (JANGAN pakai app_models)
+                            email: response.user!.email ?? '',
+                            role: userRole,
+                          );
+
+                          // 5. Tutup Loading
+                          if (mounted) Navigator.pop(context);
+
+                          // 6. Navigasi Berdasarkan Role
+                          if (mounted) {
+                            if (userRole == app_models.UserRole.admin) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Berhasil masuk sebagai ADMIN"),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+
+                              // 👇 PERUBAHAN UTAMA: Arahkan ke AdminDashboardScreen
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AdminDashboardScreen()),
+                              );
+                            } else {
+                              // User Biasa tetap ke MainScreen
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        MainScreen(user: user)),
+                              );
+                            }
+                          }
+                        } catch (e) {
+                          // Error Handling
+                          if (mounted)
+                            Navigator.pop(context); // Tutup loading dulu
+
+                          String errorMessage = e.toString();
+                          if (e is AuthException) {
+                            errorMessage =
+                                e.message; // Pesan error resmi dari Supabase
+                          }
+
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Login Gagal: $errorMessage'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primary,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
-                        elevation: 4,
-                        shadowColor: AppTheme.primary.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                              "Masuk Sekarang",
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
-                            ),
+                      child: const Text(
+                        'Masuk Ke Akun',
+                        style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                      ),
                     ),
                   ),
-
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Belum punya akun? ",
-                          style: TextStyle(color: Colors.grey.shade500)),
-                      GestureDetector(
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text("Fitur Register belum aktif")));
+                      Expanded(child: Divider(color: Colors.grey.shade100)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'ATAU',
+                          style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade400,
+                              letterSpacing: 2),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: Colors.grey.shade100)),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            side: BorderSide(color: Colors.grey.shade200),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SvgPicture.asset(
+                                'assets/images/google_icon.svg',
+                                width: 18,
+                                height: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('Google',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.textMain)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            // Create guest user
+                            final guestUser = app_models.User(
+                              name: 'Guest',
+                              email: 'guest@gentengforyou.com',
+                              role: app_models.UserRole.guest,
+                            );
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    MainScreen(user: guestUser),
+                              ),
+                            );
                           },
-                          child: const Text("Daftar",
-                              style: TextStyle(
-                                  color: AppTheme.primary,
-                                  fontWeight: FontWeight.bold))),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            side: BorderSide(color: Colors.grey.shade200),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.account_circle_outlined,
+                                  color: Colors.grey.shade400, size: 18),
+                              const SizedBox(width: 8),
+                              const Text('Tamu',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.textMain)),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            SizedBox(height: isDesktop ? 28 : 40),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Belum punya akun?',
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade500)),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const RegisterScreen()),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.only(left: 4),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text(
+                    'Daftar Sekarang',
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: isDesktop ? 32 : 48),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildFooterLink('TERMS'),
+                const SizedBox(width: 20),
+                _buildFooterLink('PRIVACY'),
+                const SizedBox(width: 20),
+                _buildFooterLink('HELP'),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '© 2024 GENTENGFORYOU INDONESIA',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade300,
+                  letterSpacing: 2),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // --- WIDGET CUSTOM ORIGINAL KAMU ---
-  Widget _buildInputContainer({
-    required String label,
+  Widget _buildFloatingInput({
     required TextEditingController controller,
     required FocusNode focusNode,
+    required String label,
     required bool isFocused,
-    required IconData prefixIcon,
-    bool isPassword = false,
+    bool obscureText = false,
+    Widget? suffixIcon,
   }) {
-    bool shouldFloat = isFocused || controller.text.isNotEmpty;
+    final hasValue = controller.text.isNotEmpty;
+    final shouldFloat = isFocused || hasValue;
 
-    // UI Input Kerenmu Tetap Ada
-    return GestureDetector(
-      onTap: () => focusNode.requestFocus(),
+    return Container(
+      height: 56,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isFocused ? AppTheme.primary : Colors.grey.shade200,
-                width: isFocused ? 2 : 1,
+          TextField(
+            controller: controller,
+            focusNode: focusNode,
+            obscureText: obscureText,
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.only(
+                left: 20,
+                right: suffixIcon != null ? 48 : 20,
+                top: shouldFloat ? 20 : 16,
+                bottom: 16,
               ),
-              boxShadow: [
-                if (isFocused)
-                  BoxShadow(
-                      color: AppTheme.primary.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4)),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            alignment: Alignment.centerLeft,
-            child: Row(
-              children: [
-                Icon(prefixIcon,
-                    color: isFocused ? AppTheme.primary : Colors.grey.shade400),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    focusNode: focusNode,
-                    obscureText: isPassword && _obscurePassword,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w600, color: AppTheme.textMain),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.only(top: 8),
-                    ),
-                  ),
-                ),
-                if (isPassword)
-                  IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: Colors.grey.shade400,
-                    ),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-              ],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppTheme.primary),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              suffixIcon: suffixIcon,
             ),
           ),
           Positioned(
-            left: shouldFloat ? 48 : 48, // Adjusted position slightly
-            top: shouldFloat ? 8 : 20,
-            child: AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
-              style: TextStyle(
-                fontSize: shouldFloat ? 10 : 14,
-                color: isFocused ? AppTheme.primary : Colors.grey.shade400,
-                fontWeight: shouldFloat ? FontWeight.bold : FontWeight.normal,
+            left: shouldFloat ? 16 : 20,
+            top: shouldFloat ? -8 : 18,
+            child: IgnorePointer(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                color: Colors.white,
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: shouldFloat ? 12 : 15,
+                    color: shouldFloat && isFocused
+                        ? AppTheme.primary
+                        : Colors.grey.shade400,
+                    fontWeight:
+                        shouldFloat ? FontWeight.w500 : FontWeight.normal,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.visible,
+                ),
               ),
-              child: Text(label),
             ),
           ),
         ],
@@ -354,10 +693,10 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Text(
         text,
         style: TextStyle(
-            fontSize: 12,
+            fontSize: 10,
             fontWeight: FontWeight.w600,
-            color: AppTheme.primary,
-            letterSpacing: 0.5),
+            color: Colors.grey.shade400,
+            letterSpacing: 2),
       ),
     );
   }
