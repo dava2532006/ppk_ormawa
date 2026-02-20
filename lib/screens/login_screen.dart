@@ -421,7 +421,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) =>
-                                        MainScreen(user: user)),
+                                        const MainScreen()),
                               );
                             }
                           }
@@ -512,18 +512,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () {
-                            // Create guest user
-                            final guestUser = app_models.User(
-                              name: 'Guest',
-                              email: 'guest@gentengforyou.com',
-                              role: app_models.UserRole.guest,
-                            );
-
+                            // Navigate to MainScreen as guest (no login)
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    MainScreen(user: guestUser),
+                                    const MainScreen(),
                               ),
                             );
                           },

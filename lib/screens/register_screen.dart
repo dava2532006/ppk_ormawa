@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/theme.dart';
 import 'main_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -410,11 +411,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               );
 
                               try {
-                                // 4. Panggil Backend Supabase (Lewat AuthService)
-                                await AuthService().signUp(
-                                  _emailController.text.trim(),
-                                  _passwordController.text,
-                                  _nameController.text.trim(),
+                                // 4. Panggil Backend Supabase
+                                await Supabase.instance.client.auth.signUp(
+                                  email: _emailController.text.trim(),
+                                  password: _passwordController.text,
+                                  data: {
+                                    'full_name': _nameController.text.trim(),
+                                  },
                                 );
 
                                 // 5. Jika Sukses

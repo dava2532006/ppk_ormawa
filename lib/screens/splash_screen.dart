@@ -110,32 +110,14 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _checkAuthAndNavigate() async {
-    final session = Supabase.instance.client.auth.currentSession;
-
-    app_models.User currentUser;
-
-    if (session != null) {
-      // JIKA SUDAH LOGIN
-      currentUser = app_models.User(
-        name: session.user.userMetadata?['full_name'] ?? 'User',
-        email: session.user.email ?? '',
-        // Kita sesuaikan Role dengan yang ada di kodemu (UserRole.user)
-        role: app_models.UserRole.user,
-      );
-    } else {
-      // JIKA GUEST
-      currentUser = app_models.User(
-        name: 'Guest',
-        email: 'guest@gentengforyou.com',
-        role: app_models.UserRole.guest,
-      );
-    }
+    // Cek session Supabase (opsional, MainScreen akan handle sendiri)
+    // final session = Supabase.instance.client.auth.currentSession;
 
     if (mounted) {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              MainScreen(user: currentUser),
+              const MainScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: animation,
